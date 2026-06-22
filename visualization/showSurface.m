@@ -10,7 +10,6 @@ function showSurface(X2D, Y2D, T2D, ax)
     cb.Color = 'w';
     colormap(ax, 'jet');
     
-    % Styling
     set(ax, 'Color', 'k', 'XColor', 'w', 'YColor', 'w', 'ZColor', 'w', 'GridColor', 'w', 'GridAlpha', 0.4);
     xlabel(ax, 'X', 'Color', 'w', 'FontWeight', 'bold');
     ylabel(ax, 'Y', 'Color', 'w', 'FontWeight', 'bold');
