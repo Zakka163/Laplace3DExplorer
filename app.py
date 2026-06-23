@@ -47,6 +47,10 @@ class Laplace3DApp(tk.Tk):
         theme_menu.add_command(label="Dark Mode", command=lambda: self.switch_theme("Dark"))
         theme_menu.add_command(label="Light Mode", command=lambda: self.switch_theme("Light"))
         
+        self.export_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="Export", menu=self.export_menu)
+        self.export_menu.add_command(label="Export 3D Grid Data (CSV)", command=self.export_csv, state=tk.DISABLED)
+        
         self.solver_res = None
         self.coord_sys = "Cartesian"
         self.Lx = 1.0
@@ -129,7 +133,7 @@ class Laplace3DApp(tk.Tk):
         self.sidebar_frame = tk.Frame(self.h_paned, bg=Theme.BG_ROOT)
         self.h_paned.add(self.sidebar_frame, stretch="never")
         
-        self.control_panel = ControlPanel(self.sidebar_frame, self.solve_system, self.export_csv, self.coord_sys)
+        self.control_panel = ControlPanel(self.sidebar_frame, self.solve_system, self.coord_sys)
         self.control_panel.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
         
         # --- CENTER VISUALIZATION ---
@@ -267,6 +271,9 @@ class Laplace3DApp(tk.Tk):
             self.control_panel.solve_btn.config(text="SOLVE", state=tk.NORMAL, bg="#006400")
             
             self.visualization_panel.render_visualization()
+            
+            # Enable export menu after successful solve
+            self.export_menu.entryconfig("Export 3D Grid Data (CSV)", state=tk.NORMAL)
             
         except Exception as e:
             messagebox.showerror("Error updating UI", str(e))

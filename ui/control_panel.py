@@ -2,10 +2,9 @@ import tkinter as tk
 from ui.theme import Theme
 
 class ControlPanel(tk.LabelFrame):
-    def __init__(self, parent, solve_callback, export_callback, coord_sys="Cartesian"):
+    def __init__(self, parent, solve_callback, coord_sys="Cartesian"):
         super().__init__(parent, text="Control Panel", bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, font=Theme.FONT_BOLD, padx=10, pady=10)
         self.solve_callback = solve_callback
-        self.export_callback = export_callback
         self.coord_sys = coord_sys
         self.inputs = {}
         self.build_ui()
@@ -44,11 +43,6 @@ class ControlPanel(tk.LabelFrame):
         self.solve_btn.bind("<Leave>", lambda e: self.solve_btn.config(bg=Theme.SUCCESS))
         
         tk.Label(self, text="", bg=Theme.BG_PANEL).pack(pady=5)
-        
-        self.export_btn = tk.Button(self, text="Export 3D Grid Data (CSV)", bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, relief="flat", font=Theme.FONT_SMALL, command=self.export_callback)
-        self.export_btn.pack(fill=tk.X, side=tk.BOTTOM, pady=5)
-        self.export_btn.bind("<Enter>", lambda e: self.export_btn.config(bg=Theme.BORDER))
-        self.export_btn.bind("<Leave>", lambda e: self.export_btn.config(bg=Theme.BG_INPUT))
 
     def apply_theme(self):
         self.configure(bg=Theme.BG_PANEL, fg=Theme.FG_MAIN)
@@ -64,5 +58,3 @@ class ControlPanel(tk.LabelFrame):
                 widget.configure(bg=Theme.BG_PANEL)
         
         self.solve_btn.configure(bg=Theme.SUCCESS, fg=Theme.FG_MAIN)
-        if hasattr(self, 'export_btn'):
-            self.export_btn.configure(bg=Theme.BG_INPUT, fg=Theme.FG_MAIN)
