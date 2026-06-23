@@ -87,32 +87,36 @@ def plot_cutaway3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
     for edge in edges:
         ax.plot3D(*zip(*edge), color='gray', alpha=0.3, linewidth=1)
         
+    import matplotlib.cm as cm
+    import matplotlib.colors as mcolors
+    
     vmin, vmax = T.min(), T.max()
-    levels = 20
+    norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
+    cmap = cm.jet
     
     # 2. Top Face (Z = z_idx)
-    ct = ax.contourf(X[:, :, z_idx], Y[:, :, z_idx], T[:, :, z_idx], 
-                     zdir='z', offset=Z[0, 0, z_idx], levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+    surf_top = ax.plot_surface(X[:, :, z_idx], Y[:, :, z_idx], Z[:, :, z_idx], 
+                               facecolors=cmap(norm(T[:, :, z_idx])), shade=False)
                      
     # 3. Bottom Face (Z = 0)
-    ax.contourf(X[:, :, 0], Y[:, :, 0], T[:, :, 0], 
-                zdir='z', offset=0, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+    ax.plot_surface(X[:, :, 0], Y[:, :, 0], Z[:, :, 0], 
+                    facecolors=cmap(norm(T[:, :, 0])), shade=False)
                 
     # 4. Front Face (Y = 0)
-    ax.contourf(X[0, :, :z_idx+1], Z[0, :, :z_idx+1], T[0, :, :z_idx+1], 
-                zdir='y', offset=0, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+    ax.plot_surface(X[0, :, :z_idx+1], Y[0, :, :z_idx+1], Z[0, :, :z_idx+1], 
+                    facecolors=cmap(norm(T[0, :, :z_idx+1])), shade=False)
                 
     # 5. Back Face (Y = Ly)
-    ax.contourf(X[-1, :, :z_idx+1], Z[-1, :, :z_idx+1], T[-1, :, :z_idx+1], 
-                zdir='y', offset=Ly, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+    ax.plot_surface(X[-1, :, :z_idx+1], Y[-1, :, :z_idx+1], Z[-1, :, :z_idx+1], 
+                    facecolors=cmap(norm(T[-1, :, :z_idx+1])), shade=False)
                 
     # 6. Left Face (X = 0)
-    ax.contourf(Y[:, 0, :z_idx+1], Z[:, 0, :z_idx+1], T[:, 0, :z_idx+1], 
-                zdir='x', offset=0, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+    ax.plot_surface(X[:, 0, :z_idx+1], Y[:, 0, :z_idx+1], Z[:, 0, :z_idx+1], 
+                    facecolors=cmap(norm(T[:, 0, :z_idx+1])), shade=False)
                 
     # 7. Right Face (X = Lx)
-    ax.contourf(Y[:, -1, :z_idx+1], Z[:, -1, :z_idx+1], T[:, -1, :z_idx+1], 
-                zdir='x', offset=Lx, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+    ax.plot_surface(X[:, -1, :z_idx+1], Y[:, -1, :z_idx+1], Z[:, -1, :z_idx+1], 
+                    facecolors=cmap(norm(T[:, -1, :z_idx+1])), shade=False)
     
     ax.set_xlim3d(0, Lx)
     ax.set_ylim3d(0, Ly)
@@ -120,4 +124,8 @@ def plot_cutaway3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
     
     z_val = Z[0, 0, z_idx]
     ax.set_title(f"Cutaway 3D (Z ≤ {z_val:.2f})", color='white')
-    return ct
+    
+    # Create a mappable for the colorbar
+    m = cm.ScalarMappable(cmap=cmap, norm=norm)
+    m.set_array(T)
+    return m
