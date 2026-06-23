@@ -53,9 +53,9 @@ class VisualizationPanel(tk.Frame):
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
         self.toolbar = NavigationToolbar2Tk(self.canvas, canvas_frame)
-        self.toolbar.config(background='#2B2B2B')
+        self.toolbar.config(background='#E0E0E0')
         for child in self.toolbar.winfo_children():
-            child.config(background='#2B2B2B')
+            child.config(background='#E0E0E0')
         self.toolbar.update()
         
         # Bind mouse scroll for 3D zoom
