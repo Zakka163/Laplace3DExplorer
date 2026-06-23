@@ -100,6 +100,9 @@ class Laplace3DApp(tk.Tk):
         self.deiconify()
         print("[INFO] Application Ready.")
         
+        # Render initial domain geometry
+        self.render_visualization()
+        
     def build_ui(self):
         style = ttk.Style(self)
         style.theme_use('clam')
@@ -221,9 +224,11 @@ class Laplace3DApp(tk.Tk):
             self.title("Laplace 3D Explorer")
             
     def render_visualization(self, event=None):
-        if self.solver_res is None: return
-        
         v_type = self.vis_type.get()
+        
+        if self.solver_res is None and v_type != "Domain Geometry":
+            return
+            
         print(f"[INFO] Rendering Visual: {v_type}")
         
         # Toggle slider visibility
@@ -243,6 +248,14 @@ class Laplace3DApp(tk.Tk):
             
         self.ax.set_facecolor('#1E1E1E')
         self.ax.tick_params(colors='white')
+            
+        if v_type == "Domain Geometry":
+            plotter.plot_domain_geometry(self.ax, self.Lx, self.Ly, self.Lz)
+            self.ax.set_xlabel('X')
+            self.ax.set_ylabel('Y')
+            self.ax.set_zlabel('Z')
+            self.canvas.draw()
+            return
             
         curr_z = int(float(self.z_slider.get()))
         
@@ -264,7 +277,8 @@ class Laplace3DApp(tk.Tk):
         elif v_type == "Surface 2D":
             plotter.plot_surface(self.ax, X2D, Y2D, T2D)
         elif v_type == "Scatter 3D":
-            plotter.plot_scatter3d(self.ax, X, Y, Z, T)
+            self.cax = plotter.plot_scatter3d(self.ax, X, Y, Z, T)
+            self.fig.colorbar(self.cax, ax=self.ax)
         elif v_type == "Isosurface":
             plotter.plot_isosurface(self.ax, X, Y, Z, T)
             
