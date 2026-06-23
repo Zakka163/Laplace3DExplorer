@@ -48,15 +48,21 @@ def plot_domain_geometry(ax, Lx, Ly, Lz):
         [0, 0, Lz], [Lx, 0, Lz], [Lx, Ly, Lz], [0, Ly, Lz]
     ])
     
-    edges = [
-        [0,1], [1,2], [2,3], [3,0],
-        [4,5], [5,6], [6,7], [7,4],
-        [0,4], [1,5], [2,6], [3,7] 
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+    
+    faces = [
+        [corners[0], corners[1], corners[2], corners[3]], # Bottom
+        [corners[4], corners[5], corners[6], corners[7]], # Top
+        [corners[0], corners[1], corners[5], corners[4]], # Front
+        [corners[3], corners[2], corners[6], corners[7]], # Back
+        [corners[0], corners[3], corners[7], corners[4]], # Left
+        [corners[1], corners[2], corners[6], corners[5]], # Right
     ]
     
-    for edge in edges:
-        p1, p2 = corners[edge[0]], corners[edge[1]]
-        ax.plot3D([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], color='cyan', linewidth=2)
+    # Create the Poly3DCollection
+    # alpha=0.5 gives it a glass-like solid transparency
+    face_collection = Poly3DCollection(faces, facecolors='cyan', linewidths=1, edgecolors='white', alpha=0.5)
+    ax.add_collection3d(face_collection)
         
     ax.set_title("Domain Geometry", color='white')
     
