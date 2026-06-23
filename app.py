@@ -51,9 +51,11 @@ class StartupDialog(tk.Toplevel):
             Lz = float(self.inputs["Lz"].get())
             if Lx <= 0 or Ly <= 0 or Lz <= 0:
                 raise ValueError("Dimensions must be positive!")
+            print(f"[INFO] Environment Created: Lx={Lx}, Ly={Ly}, Lz={Lz}")
             self.result = (Lx, Ly, Lz)
             self.destroy()
         except ValueError:
+            print("[ERROR] Invalid dimensions entered.")
             messagebox.showerror("Error", "Invalid dimensions! Please enter positive numbers.")
             
     def on_cancel(self):
@@ -77,8 +79,11 @@ class Laplace3DApp(tk.Tk):
         self.configure(bg="#1E1E1E")
         
         self.solver_res = None
+        
+        print("[INFO] Building Main GUI...")
         self.build_ui()
         self.deiconify()
+        print("[INFO] Application Ready.")
         
     def build_ui(self):
         style = ttk.Style(self)
@@ -164,6 +169,10 @@ class Laplace3DApp(tk.Tk):
             tol = 1e-6
             max_iter = 2000
             
+            print(f"\n[INFO] Starting Simulation Solver...")
+            print(f"[INFO] BCs: {BC}")
+            print(f"[INFO] Parameters: dx={dx}, omega={omega}, tol={tol}, max_iter={max_iter}")
+            
             self.title("Laplace 3D Explorer - SOLVING...")
             self.update()
             
@@ -171,6 +180,9 @@ class Laplace3DApp(tk.Tk):
             solver = Solver3D(self.Lx, self.Ly, self.Lz, dx, BC, omega, tol, max_iter)
             solver.solve()
             elapsed = time.time() - t0
+            
+            print(f"[INFO] Solver finished in {elapsed:.3f} seconds.")
+            print(f"[INFO] Total Iterations: {solver.iter}, Final Error: {solver.err:.2e}")
             
             self.solver_res = solver
             
@@ -197,6 +209,7 @@ class Laplace3DApp(tk.Tk):
         if self.solver_res is None: return
         
         v_type = self.vis_type.get()
+        print(f"[INFO] Rendering Visual: {v_type}")
         
         # Toggle slider visibility
         if "2D" in v_type:
@@ -253,7 +266,9 @@ class Laplace3DApp(tk.Tk):
         curr_z = int(float(self.z_slider.get()))
         f = filedialog.asksaveasfilename(defaultextension=".csv")
         if f:
+            print(f"[INFO] Exporting CSV to: {f}")
             np.savetxt(f, self.solver_res.T[:, :, curr_z], delimiter=",")
+            print("[INFO] Export Successful!")
             messagebox.showinfo("Export", "CSV Exported Successfully!")
 
 if __name__ == "__main__":
