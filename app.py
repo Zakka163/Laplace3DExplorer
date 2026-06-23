@@ -116,8 +116,8 @@ class Laplace3DApp(tk.Tk):
         
         self.inputs['dx'] = add_input("Grid Resolution:", 0.05)
         
-        solve_btn = tk.Button(left_panel, text="SOLVE", bg="#006400", fg="white", font=('Arial', 10, 'bold'), relief="flat", command=self.solve_system)
-        solve_btn.pack(fill=tk.X, pady=25)
+        self.solve_btn = tk.Button(left_panel, text="SOLVE", bg="#006400", fg="white", font=('Arial', 10, 'bold'), relief="flat", command=self.solve_system)
+        self.solve_btn.pack(fill=tk.X, pady=25)
         
         # CENTER PANEL
         center_panel = tk.Frame(main_frame, bg="#1E1E1E")
@@ -178,8 +178,19 @@ class Laplace3DApp(tk.Tk):
             print(f"[INFO] Parameters: dx={dx}, omega={omega}, tol={tol}, max_iter={max_iter}")
             
             self.title("Laplace 3D Explorer - SOLVING...")
+            self.solve_btn.config(text="SOLVING... PLEASE WAIT", state=tk.DISABLED, bg="#555555")
             self.update()
             
+            self.after(50, lambda: self._execute_solve(BC, dx, omega, tol, max_iter))
+            
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+            self.title("Laplace 3D Explorer")
+            if hasattr(self, 'solve_btn'):
+                self.solve_btn.config(text="SOLVE", state=tk.NORMAL, bg="#006400")
+                
+    def _execute_solve(self, BC, dx, omega, tol, max_iter):
+        try:
             t0 = time.time()
             solver = Solver3D(self.Lx, self.Ly, self.Lz, dx, BC, omega, tol, max_iter)
             solver.solve()
@@ -208,11 +219,13 @@ class Laplace3DApp(tk.Tk):
             self.vis_type.set("Heatmap 2D") # Automatically switch to a data view
             
             self.title("Laplace 3D Explorer")
+            self.solve_btn.config(text="SOLVE", state=tk.NORMAL, bg="#006400")
             self.render_visualization()
             
         except Exception as e:
             messagebox.showerror("Error", str(e))
             self.title("Laplace 3D Explorer")
+            self.solve_btn.config(text="SOLVE", state=tk.NORMAL, bg="#006400")
             
     def render_visualization(self, event=None):
         v_type = self.vis_type.get()
