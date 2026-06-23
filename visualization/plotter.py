@@ -73,6 +73,7 @@ def plot_domain_geometry(ax, Lx, Ly, Lz):
 def plot_cutaway3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
     ax.clear()
     
+    # 1. Wireframe of the original bounding box
     corners = np.array([
         [0, 0, 0], [Lx, 0, 0], [Lx, Ly, 0], [0, Ly, 0],
         [0, 0, Lz], [Lx, 0, Lz], [Lx, Ly, Lz], [0, Ly, Lz]
@@ -86,15 +87,32 @@ def plot_cutaway3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
     for edge in edges:
         ax.plot3D(*zip(*edge), color='gray', alpha=0.3, linewidth=1)
         
-    X_cut = X[:, :, :z_idx+1]
-    Y_cut = Y[:, :, :z_idx+1]
-    Z_cut = Z[:, :, :z_idx+1]
-    T_cut = T[:, :, :z_idx+1]
+    vmin, vmax = T.min(), T.max()
+    levels = 20
     
-    step = max(1, int(np.ceil(T_cut.size / 5000)))
-    Xs, Ys, Zs, Ts = X_cut.flat[::step], Y_cut.flat[::step], Z_cut.flat[::step], T_cut.flat[::step]
-    
-    sc = ax.scatter(Xs, Ys, Zs, c=Ts, cmap='jet', alpha=0.6, s=10, vmin=T.min(), vmax=T.max())
+    # 2. Top Face (Z = z_idx)
+    ct = ax.contourf(X[:, :, z_idx], Y[:, :, z_idx], T[:, :, z_idx], 
+                     zdir='z', offset=Z[0, 0, z_idx], levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+                     
+    # 3. Bottom Face (Z = 0)
+    ax.contourf(X[:, :, 0], Y[:, :, 0], T[:, :, 0], 
+                zdir='z', offset=0, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+                
+    # 4. Front Face (Y = 0)
+    ax.contourf(X[0, :, :z_idx+1], Z[0, :, :z_idx+1], T[0, :, :z_idx+1], 
+                zdir='y', offset=0, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+                
+    # 5. Back Face (Y = Ly)
+    ax.contourf(X[-1, :, :z_idx+1], Z[-1, :, :z_idx+1], T[-1, :, :z_idx+1], 
+                zdir='y', offset=Ly, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+                
+    # 6. Left Face (X = 0)
+    ax.contourf(Y[:, 0, :z_idx+1], Z[:, 0, :z_idx+1], T[:, 0, :z_idx+1], 
+                zdir='x', offset=0, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
+                
+    # 7. Right Face (X = Lx)
+    ax.contourf(Y[:, -1, :z_idx+1], Z[:, -1, :z_idx+1], T[:, -1, :z_idx+1], 
+                zdir='x', offset=Lx, levels=levels, cmap='jet', vmin=vmin, vmax=vmax)
     
     ax.set_xlim3d(0, Lx)
     ax.set_ylim3d(0, Ly)
@@ -102,4 +120,4 @@ def plot_cutaway3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
     
     z_val = Z[0, 0, z_idx]
     ax.set_title(f"Cutaway 3D (Z ≤ {z_val:.2f})", color='white')
-    return sc
+    return ct
