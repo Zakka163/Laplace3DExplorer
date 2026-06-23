@@ -3,6 +3,11 @@ from tkinter import messagebox, filedialog
 import time
 import os
 
+# Initialize globals to satisfy Pylance/Pyright
+np = None
+Solver3D = None
+plotter = None
+
 from ui.setup_dialog import SetupDialog
 from ui.control_panel import ControlPanel
 from ui.dashboard_panel import DashboardPanel

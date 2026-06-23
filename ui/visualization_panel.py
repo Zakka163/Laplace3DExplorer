@@ -28,15 +28,18 @@ class VisualizationPanel(tk.Frame):
         self.vis_cb.pack(side=tk.LEFT, padx=5)
         self.vis_cb.bind("<<ComboboxSelected>>", lambda e: self.render_visualization())
         
-        self.lbl_z_slider = tk.Label(top_center, text="Z Layer:", bg="#1E1E1E", fg="white")
+        self.lbl_z_slider = tk.Label(top_center, text="Z Height:", bg="#1E1E1E", fg="white")
         self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
         
         self.z_var = tk.IntVar(value=0)
-        self.z_spin = ttk.Spinbox(top_center, from_=0, to=10, textvariable=self.z_var, width=5, command=lambda: self.render_visualization())
-        self.z_spin.pack(side=tk.LEFT, padx=2)
-        self.z_spin.bind('<Return>', lambda e: self.render_visualization())
+        self.z_spin_var = tk.DoubleVar(value=0.0)
         
-        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg="#1E1E1E", fg="white", highlightthickness=0, variable=self.z_var, showvalue=False, command=lambda v: self.render_visualization())
+        self.z_spin = ttk.Spinbox(top_center, from_=0.0, to=10.0, textvariable=self.z_spin_var, width=8, increment=0.1)
+        self.z_spin.pack(side=tk.LEFT, padx=2)
+        self.z_spin.bind('<Return>', self.on_spinbox_enter)
+        
+        # We set resolution=1 explicitly so the slider moves in integer steps (index layers)
+        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg="#1E1E1E", fg="white", highlightthickness=0, variable=self.z_var, showvalue=False, resolution=1, command=lambda v: self.render_visualization())
         self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         
         self.fig = Figure(figsize=(6, 5), dpi=100)
@@ -58,26 +61,44 @@ class VisualizationPanel(tk.Frame):
         # Bind mouse scroll for 3D zoom
         self.canvas.mpl_connect('scroll_event', self.on_scroll_zoom)
         
+    def on_spinbox_enter(self, event=None):
+        if self.app.solver_res is None:
+            return
+        try:
+            target_z = float(self.z_spin_var.get())
+            # Clamp to physical bounds
+            if target_z < 0: target_z = 0.0
+            if target_z > self.app.solver_res.Lz: target_z = self.app.solver_res.Lz
+            
+            # Find the closest layer index
+            Z_1D = self.app.solver_res.Z[0, 0, :]
+            closest_idx = (np.abs(Z_1D - target_z)).argmin()
+            
+            # Set slider, which triggers render_visualization
+            self.z_var.set(closest_idx)
+            self.render_visualization()
+        except ValueError:
+            pass # Invalid float
+
     def on_scroll_zoom(self, event):
-        if not hasattr(self.ax, 'get_xlim3d'):
-            return # Only apply to 3D axes
         if event.inaxes != self.ax:
             return
             
         scale_factor = 1.1 if event.button == 'down' else 0.9
-        
-        xlim = self.ax.get_xlim3d()
-        ylim = self.ax.get_ylim3d()
-        zlim = self.ax.get_zlim3d()
         
         def zoom_lims(lims, s):
             center = (lims[1] + lims[0]) / 2
             width = lims[1] - lims[0]
             return center - width/2 * s, center + width/2 * s
             
-        self.ax.set_xlim3d(zoom_lims(xlim, scale_factor))
-        self.ax.set_ylim3d(zoom_lims(ylim, scale_factor))
-        self.ax.set_zlim3d(zoom_lims(zlim, scale_factor))
+        if hasattr(self.ax, 'get_xlim3d'):
+            self.ax.set_xlim3d(zoom_lims(self.ax.get_xlim3d(), scale_factor))
+            self.ax.set_ylim3d(zoom_lims(self.ax.get_ylim3d(), scale_factor))
+            self.ax.set_zlim3d(zoom_lims(self.ax.get_zlim3d(), scale_factor))
+        else:
+            self.ax.set_xlim(zoom_lims(self.ax.get_xlim(), scale_factor))
+            self.ax.set_ylim(zoom_lims(self.ax.get_ylim(), scale_factor))
+            
         self.canvas.draw_idle()
 
     def render_visualization(self, event=None):
@@ -140,7 +161,9 @@ class VisualizationPanel(tk.Frame):
                 self.z_var.set(curr_z)
                 
             physical_z = Z[0, 0, curr_z]
-            self.lbl_z_slider.config(text=f"Z Layer Index [Z = {physical_z:.2f}]:")
+            # Update spinbox and label with physical Z
+            self.z_spin_var.set(round(physical_z, 4))
+            self.lbl_z_slider.config(text=f"Z Layer Index: {curr_z}  [Z = {physical_z:.2f}]:")
             
             X2D = X[:, :, curr_z]
             Y2D = Y[:, :, curr_z]
