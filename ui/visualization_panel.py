@@ -103,11 +103,26 @@ class VisualizationPanel(tk.Frame):
 
     def get_physical_coordinates(self):
         if not hasattr(self.app, 'solver_res') or self.app.solver_res is None:
-            return None, None, None
-            
-        X = self.app.solver_res.X
-        Y = self.app.solver_res.Y
-        Z = self.app.solver_res.Z
+            # Generate a dummy grid for initial Domain Geometry rendering
+            Lx, Ly, Lz = self.app.Lx, self.app.Ly, self.app.Lz
+            nx, ny, nz = 10, 10, 10
+            if self.app.coord_sys == "Cartesian":
+                x = np.linspace(0, Lx, nx)
+                y = np.linspace(0, Ly, ny)
+                z = np.linspace(0, Lz, nz)
+            elif self.app.coord_sys == "Cylindrical":
+                x = np.linspace(0.01, Lx, nx)
+                y = np.linspace(0, Ly, ny)
+                z = np.linspace(0, Lz, nz)
+            elif self.app.coord_sys == "Spherical":
+                x = np.linspace(0.01, Lx, nx)
+                y = np.linspace(0.01, Ly-0.01, ny)
+                z = np.linspace(0, Lz, nz)
+            X, Y, Z = np.meshgrid(x, y, z)
+        else:
+            X = self.app.solver_res.X
+            Y = self.app.solver_res.Y
+            Z = self.app.solver_res.Z
         
         if self.app.coord_sys == "Cylindrical":
             R, Theta = X, Y
