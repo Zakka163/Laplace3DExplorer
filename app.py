@@ -9,26 +9,30 @@ class StartupDialog(tk.Toplevel):
         self.on_complete = on_complete
         print("[INFO] Opening Setup Dialog...")
         self.title("Simulation Setup")
-        self.geometry("350x250")
-        self.configure(bg="#2B2B2B")
-        self.resizable(False, False)
+        self.geometry("1200x700")
+        self.configure(bg="#1E1E1E")
+        self.resizable(True, True)
         
-        tk.Label(self, text="Define Domain Size", bg="#2B2B2B", fg="white", font=('Arial', 14, 'bold')).pack(pady=15)
+        # Center container
+        container = tk.Frame(self, bg="#1E1E1E")
+        container.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
-        frame = tk.Frame(self, bg="#2B2B2B")
+        tk.Label(container, text="Define Domain Size", bg="#1E1E1E", fg="white", font=('Arial', 24, 'bold')).pack(pady=25)
+        
+        frame = tk.Frame(container, bg="#1E1E1E")
         frame.pack(pady=10)
         
         self.inputs = {}
         for lbl, key in [("Length X (Lx):", "Lx"), ("Length Y (Ly):", "Ly"), ("Length Z (Lz):", "Lz")]:
-            f = tk.Frame(frame, bg="#2B2B2B")
-            f.pack(fill=tk.X, pady=5)
-            tk.Label(f, text=lbl, bg="#2B2B2B", fg="white", width=15, anchor="w").pack(side=tk.LEFT)
-            e = tk.Entry(f, width=10, bg="#404040", fg="white", insertbackground="white", relief="flat")
+            f = tk.Frame(frame, bg="#1E1E1E")
+            f.pack(fill=tk.X, pady=10)
+            tk.Label(f, text=lbl, bg="#1E1E1E", fg="white", width=15, anchor="w", font=('Arial', 14)).pack(side=tk.LEFT)
+            e = tk.Entry(f, width=15, bg="#404040", fg="white", insertbackground="white", relief="flat", font=('Arial', 14))
             e.insert(0, "1.0")
-            e.pack(side=tk.RIGHT)
+            e.pack(side=tk.RIGHT, padx=10)
             self.inputs[key] = e
             
-        tk.Button(self, text="Create Environment", bg="#006400", fg="white", font=('Arial', 10, 'bold'), relief="flat", command=self.on_submit).pack(pady=20)
+        tk.Button(container, text="Create Environment", bg="#006400", fg="white", font=('Arial', 14, 'bold'), relief="flat", command=self.on_submit, padx=20, pady=10).pack(pady=40)
         
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
         
