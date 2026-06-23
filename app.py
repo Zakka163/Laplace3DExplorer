@@ -11,7 +11,6 @@ plotter = None
 
 from ui.setup_dialog import SetupDialog
 from ui.control_panel import ControlPanel
-from ui.dashboard_panel import DashboardPanel
 from ui.visualization_panel import VisualizationPanel
 from ui.log_panel import LogPanel
 from ui.theme import Theme
@@ -32,7 +31,7 @@ class Laplace3DApp(tk.Tk):
         self.menu_bar.add_cascade(label="View", menu=view_menu)
         
         self.show_sidebar = tk.BooleanVar(value=True)
-        self.show_terminal = tk.BooleanVar(value=True)
+        self.show_terminal = tk.BooleanVar(value=False)
         view_menu.add_checkbutton(label="Toggle Sidebar", variable=self.show_sidebar, command=self.toggle_panels)
         view_menu.add_checkbutton(label="Toggle Terminal", variable=self.show_terminal, command=self.toggle_panels)
         view_menu.add_separator()
@@ -113,45 +112,42 @@ class Laplace3DApp(tk.Tk):
         style.configure('TButton', background=Theme.SUCCESS, foreground=Theme.FG_MAIN, font=Theme.FONT_SMALL)
         
         # Main Vertical Splitter (Top: UI, Bottom: Log)
-        self.v_paned = tk.ttk.PanedWindow(self, orient=tk.VERTICAL)
+        self.v_paned = tk.PanedWindow(self, orient=tk.VERTICAL, opaqueresize=False, bg=Theme.BG_ROOT, sashwidth=4)
         self.v_paned.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         # Top Horizontal Splitter (Left: Sidebar, Right: Viz)
-        self.h_paned = tk.ttk.PanedWindow(self.v_paned, orient=tk.HORIZONTAL)
-        self.v_paned.add(self.h_paned, weight=1)
+        self.h_paned = tk.PanedWindow(self.v_paned, orient=tk.HORIZONTAL, opaqueresize=False, bg=Theme.BG_ROOT, sashwidth=4)
+        self.v_paned.add(self.h_paned, stretch="always")
         
-        # --- LEFT SIDEBAR (Control + Dashboard) ---
+        # --- LEFT SIDEBAR (Control) ---
         self.sidebar_frame = tk.Frame(self.h_paned, bg=Theme.BG_ROOT)
-        self.h_paned.add(self.sidebar_frame, weight=0)
+        self.h_paned.add(self.sidebar_frame, stretch="never")
         
-        self.control_panel = ControlPanel(self.sidebar_frame, self.solve_system, self.on_aspect_ratio_toggle, self.coord_sys)
+        self.control_panel = ControlPanel(self.sidebar_frame, self.solve_system, self.on_aspect_ratio_toggle, self.export_csv, self.coord_sys)
         self.control_panel.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
-        
-        self.dashboard_panel = DashboardPanel(self.sidebar_frame, self.export_csv)
-        self.dashboard_panel.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
         
         # --- CENTER VISUALIZATION ---
         self.viz_frame = tk.Frame(self.h_paned, bg=Theme.BG_ROOT)
-        self.h_paned.add(self.viz_frame, weight=1)
+        self.h_paned.add(self.viz_frame, stretch="always")
         
         self.visualization_panel = VisualizationPanel(self.viz_frame, self)
         self.visualization_panel.pack(fill=tk.BOTH, expand=True)
         
         # --- BOTTOM LOG PANEL ---
         self.log_panel = LogPanel(self.v_paned)
-        self.v_paned.add(self.log_panel, weight=0)
+        # Terminal hidden by default, so we don't add it initially
         
         # Save references for toggling
         self.main_container = self.v_paned
         
     def toggle_panels(self):
         if self.show_sidebar.get():
-            self.h_paned.insert(0, self.sidebar_frame, weight=0)
+            self.h_paned.insert(0, self.sidebar_frame, stretch="never")
         else:
             self.h_paned.forget(self.sidebar_frame)
             
         if self.show_terminal.get():
-            self.v_paned.add(self.log_panel, weight=0)
+            self.v_paned.add(self.log_panel, stretch="never")
         else:
             self.v_paned.forget(self.log_panel)
 
@@ -186,8 +182,6 @@ class Laplace3DApp(tk.Tk):
             
             if hasattr(self, 'control_panel'):
                 self.control_panel.apply_theme()
-            if hasattr(self, 'dashboard_panel'):
-                self.dashboard_panel.apply_theme()
             if hasattr(self, 'visualization_panel'):
                 self.visualization_panel.apply_theme()
             if hasattr(self, 'log_panel'):
@@ -248,11 +242,9 @@ class Laplace3DApp(tk.Tk):
             
             ny, nx, nz = solver.T.shape
             
-            # Update Dashboard
-            self.dashboard_panel.update_metrics(
-                elapsed, solver.iter, solver.err, 
-                np.max(solver.T), np.min(solver.T), solver.T[ny//2, nx//2, nz//2]
-            )
+            # Log metrics instead of updating dashboard
+            print(f"Time: {elapsed:.3f} s, Iter: {solver.iter}, Error: {solver.err:.2e}")
+            print(f"Max Temp: {np.max(solver.T):.2f}, Min Temp: {np.min(solver.T):.2f}, Center Temp: {solver.T[ny//2, nx//2, nz//2]:.2f}")
             
             # Update Visualization Panel Controls
             self.visualization_panel.z_slider.config(to=nz-1)
