@@ -14,7 +14,7 @@ class ControlPanel(tk.LabelFrame):
         def add_input(label_text, default_val):
             f = tk.Frame(self, bg=Theme.BG_PANEL)
             f.pack(fill=tk.X, pady=3)
-            tk.Label(f, text=label_text, width=15, bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, font=Theme.FONT_SMALL, anchor="w").pack(side=tk.LEFT)
+            tk.Label(f, text=label_text, width=18, bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, font=Theme.FONT_SMALL, anchor="w").pack(side=tk.LEFT)
             e = tk.Entry(f, width=10, bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, insertbackground=Theme.FG_MAIN, relief="flat", font=Theme.FONT_SMALL)
             e.insert(0, str(default_val))
             e.pack(side=tk.RIGHT)

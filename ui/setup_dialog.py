@@ -32,7 +32,7 @@ class SetupDialog:
         # Coordinate System Selection
         coord_frame = tk.Frame(inner_frame, bg=Theme.BG_PANEL)
         coord_frame.pack(fill=tk.X, pady=15)
-        ttk.Label(coord_frame, text="Coordinate System:", style='Setup.TLabel', background=Theme.BG_PANEL, width=18, anchor="w").pack(side=tk.LEFT)
+        ttk.Label(coord_frame, text="Coordinate System:", style='Setup.TLabel', background=Theme.BG_PANEL, width=20, anchor="w").pack(side=tk.LEFT)
         
         self.coord_var = tk.StringVar(value="Cartesian")
         self.coord_cb = ttk.Combobox(coord_frame, textvariable=self.coord_var, values=["Cartesian", "Cylindrical", "Spherical"], state="readonly", style='Setup.TCombobox', width=13, font=Theme.FONT_REGULAR)
@@ -72,7 +72,7 @@ class SetupDialog:
         for lbl, key, default_val in zip(self.labels, self.keys, self.defaults):
             f = tk.Frame(self.inputs_frame, bg=Theme.BG_PANEL)
             f.pack(fill=tk.X, pady=8)
-            ttk.Label(f, text=lbl, style='Setup.TLabel', background=Theme.BG_PANEL, width=22, anchor="w").pack(side=tk.LEFT)
+            ttk.Label(f, text=lbl, style='Setup.TLabel', background=Theme.BG_PANEL, width=26, anchor="w").pack(side=tk.LEFT)
             e = tk.Entry(f, width=12, bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, insertbackground=Theme.FG_MAIN, relief="flat", font=Theme.FONT_REGULAR, justify="center")
             e.insert(0, default_val)
             e.pack(side=tk.RIGHT)
