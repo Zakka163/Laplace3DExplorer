@@ -127,7 +127,7 @@ class Laplace3DApp(tk.Tk):
         self.solve_btn.pack(fill=tk.X, pady=25)
         
         self.equal_aspect_var = tk.BooleanVar(value=False)
-        tk.Checkbutton(left_panel, text="Equal Aspect Ratio (True 3D Scale)", variable=self.equal_aspect_var, bg="#2B2B2B", fg="white", selectcolor="#404040", activebackground="#2B2B2B", activeforeground="white", command=self.render_visualization).pack(anchor="w", pady=5)
+        tk.Checkbutton(left_panel, text="Equal Aspect Ratio (True 3D Scale)", variable=self.equal_aspect_var, bg="#2B2B2B", fg="white", selectcolor="#404040", activebackground="#2B2B2B", activeforeground="white", command=self.update_aspect_ratio).pack(anchor="w", pady=5)
         
         # CENTER PANEL
         center_panel = tk.Frame(main_frame, bg="#1E1E1E")
@@ -341,6 +341,28 @@ class Laplace3DApp(tk.Tk):
             
         finally:
             self._is_rendering = False
+            
+    def update_aspect_ratio(self):
+        if not hasattr(self, 'ax'):
+            return
+            
+        v_type = self.vis_type.get()
+        if hasattr(self.ax, 'set_box_aspect') and v_type in ["Domain Geometry", "Scatter 3D", "Isosurface"]:
+            if self.equal_aspect_var.get():
+                if v_type == "Domain Geometry":
+                    Lx = self.solver_res.Lx if hasattr(self, 'solver_res') and self.solver_res else self.Lx
+                    Ly = self.solver_res.Ly if hasattr(self, 'solver_res') and self.solver_res else self.Ly
+                    Lz = self.solver_res.Lz if hasattr(self, 'solver_res') and self.solver_res else self.Lz
+                    self.ax.set_box_aspect((Lx, Ly, Lz))
+                else:
+                    if hasattr(self, 'solver_res') and self.solver_res is not None:
+                        X = self.solver_res.X
+                        Y = self.solver_res.Y
+                        Z = self.solver_res.Z
+                        self.ax.set_box_aspect((np.ptp(X), np.ptp(Y), np.ptp(Z)))
+            else:
+                self.ax.set_box_aspect((1, 1, 1)) # Default cube
+            self.canvas.draw()
         
     def export_csv(self):
         if self.solver_res is None: return
