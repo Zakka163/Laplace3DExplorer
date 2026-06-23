@@ -126,6 +126,9 @@ class Laplace3DApp(tk.Tk):
         self.solve_btn = tk.Button(left_panel, text="SOLVE", bg="#006400", fg="white", font=('Arial', 10, 'bold'), relief="flat", command=self.solve_system)
         self.solve_btn.pack(fill=tk.X, pady=25)
         
+        self.equal_aspect_var = tk.BooleanVar(value=False)
+        tk.Checkbutton(left_panel, text="Equal Aspect Ratio (True 3D Scale)", variable=self.equal_aspect_var, bg="#2B2B2B", fg="white", selectcolor="#404040", activebackground="#2B2B2B", activeforeground="white", command=self.render_visualization).pack(anchor="w", pady=5)
+        
         # CENTER PANEL
         center_panel = tk.Frame(main_frame, bg="#1E1E1E")
         center_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
@@ -308,6 +311,18 @@ class Laplace3DApp(tk.Tk):
             self.cb = self.fig.colorbar(self.cax, ax=self.ax)
         elif v_type == "Isosurface":
             plotter.plot_isosurface(self.ax, X, Y, Z, T)
+            
+        # Apply aspect ratio for 3D plots
+        if hasattr(self.ax, 'set_box_aspect') and v_type in ["Domain Geometry", "Scatter 3D", "Isosurface"]:
+            if self.equal_aspect_var.get():
+                if v_type == "Domain Geometry":
+                    self.ax.set_box_aspect((self.solver_res.Lx if self.solver_res else self.Lx, 
+                                            self.solver_res.Ly if self.solver_res else self.Ly, 
+                                            self.solver_res.Lz if self.solver_res else self.Lz))
+                else:
+                    self.ax.set_box_aspect((np.ptp(X), np.ptp(Y), np.ptp(Z)))
+            else:
+                self.ax.set_box_aspect((1, 1, 1)) # Default cube
             
         self.ax.set_xlabel('X Axis', color='white', fontsize=10)
         self.ax.set_ylabel('Y Axis', color='white', fontsize=10)
