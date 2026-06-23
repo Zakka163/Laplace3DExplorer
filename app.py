@@ -134,7 +134,13 @@ class Laplace3DApp(tk.Tk):
         
         self.lbl_z_slider = tk.Label(top_center, text="Z Layer:", bg="#1E1E1E", fg="white")
         self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
-        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg="#1E1E1E", fg="white", highlightthickness=0, command=lambda v: self.render_visualization())
+        
+        self.z_var = tk.IntVar(value=0)
+        self.z_spin = ttk.Spinbox(top_center, from_=0, to=10, textvariable=self.z_var, width=5, command=lambda: self.render_visualization())
+        self.z_spin.pack(side=tk.LEFT, padx=2)
+        self.z_spin.bind('<Return>', lambda e: self.render_visualization())
+        
+        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg="#1E1E1E", fg="white", highlightthickness=0, variable=self.z_var, showvalue=False, command=lambda v: self.render_visualization())
         self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         
         self.fig = Figure(figsize=(6, 5), dpi=100)
@@ -192,7 +198,8 @@ class Laplace3DApp(tk.Tk):
             self.labels["Center Temp"].config(text=f"Center Temp: {solver.T[ny//2, nx//2, nz//2]:.2f}")
             
             self.z_slider.config(to=nz-1)
-            self.z_slider.set(nz//2)
+            self.z_spin.config(to=nz-1)
+            self.z_var.set(nz//2)
             
             # Unlock all visual types after solving
             self.vis_cb.config(values=["Domain Geometry", "Heatmap 2D", "Contour 2D", "Surface 2D", "Scatter 3D", "Isosurface"])
@@ -216,9 +223,11 @@ class Laplace3DApp(tk.Tk):
         # Toggle slider visibility
         if "2D" in v_type:
             self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
+            self.z_spin.pack(side=tk.LEFT, padx=2)
             self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         else:
             self.lbl_z_slider.pack_forget()
+            self.z_spin.pack_forget()
             self.z_slider.pack_forget()
             
         self.fig.clf()
@@ -239,7 +248,7 @@ class Laplace3DApp(tk.Tk):
             self.canvas.draw()
             return
             
-        curr_z = int(float(self.z_slider.get()))
+        curr_z = self.z_var.get()
         
         T = self.solver_res.T
         X = self.solver_res.X
