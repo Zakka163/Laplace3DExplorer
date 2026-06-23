@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 import time
 import os
+import threading
 
 # Initialize globals to satisfy Pylance/Pyright
 np = None
@@ -119,14 +120,15 @@ class Laplace3DApp(tk.Tk):
             self.control_panel.solve_btn.config(text="SOLVING... PLEASE WAIT", state=tk.DISABLED, bg="#555555")
             self.update()
             
-            self.after(50, lambda: self._execute_solve(BC, dx, omega, tol, max_iter))
+            # Run solver in background thread to avoid freezing UI
+            threading.Thread(target=self._execute_solve_thread, args=(BC, dx, omega, tol, max_iter), daemon=True).start()
             
         except Exception as e:
             messagebox.showerror("Error", str(e))
             self.title("Laplace 3D Explorer")
             self.control_panel.solve_btn.config(text="SOLVE", state=tk.NORMAL, bg="#006400")
                 
-    def _execute_solve(self, BC, dx, omega, tol, max_iter):
+    def _execute_solve_thread(self, BC, dx, omega, tol, max_iter):
         try:
             t0 = time.time()
             solver = Solver3D(self.Lx, self.Ly, self.Lz, dx, BC, omega, tol, max_iter)
@@ -136,6 +138,18 @@ class Laplace3DApp(tk.Tk):
             print(f"[INFO] Solver finished in {elapsed:.3f} seconds.")
             print(f"[INFO] Total Iterations: {solver.iter}, Final Error: {solver.err:.2e}")
             
+            # Marshal the UI update back to the main thread
+            self.after(0, lambda: self._on_solve_complete(solver, elapsed))
+        except Exception as e:
+            self.after(0, lambda err=e: self._on_solve_error(err))
+            
+    def _on_solve_error(self, e):
+        messagebox.showerror("Error", f"Solver Error: {str(e)}")
+        self.title("Laplace 3D Explorer")
+        self.control_panel.solve_btn.config(text="SOLVE", state=tk.NORMAL, bg="#006400")
+
+    def _on_solve_complete(self, solver, elapsed):
+        try:
             self.solver_res = solver
             
             ny, nx, nz = solver.T.shape
@@ -159,7 +173,7 @@ class Laplace3DApp(tk.Tk):
             self.visualization_panel.render_visualization()
             
         except Exception as e:
-            messagebox.showerror("Error", str(e))
+            messagebox.showerror("Error updating UI", str(e))
             self.title("Laplace 3D Explorer")
             self.control_panel.solve_btn.config(text="SOLVE", state=tk.NORMAL, bg="#006400")
             
