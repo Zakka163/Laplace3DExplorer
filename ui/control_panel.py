@@ -16,8 +16,8 @@ class ControlPanel(tk.LabelFrame):
         def add_input(parent, label_text, default_val):
             f = tk.Frame(parent, bg=Theme.BG_PANEL)
             f.pack(side=tk.TOP, fill=tk.X, pady=2, padx=5)
-            tk.Label(f, text=label_text, width=18, bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, font=Theme.FONT_SMALL, anchor="w").pack(side=tk.LEFT)
-            e = tk.Entry(f, width=8, bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, insertbackground=Theme.FG_MAIN, relief="flat", font=Theme.FONT_SMALL)
+            tk.Label(f, text=label_text, width=14, bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, font=Theme.FONT_SMALL, anchor="w").pack(side=tk.LEFT)
+            e = tk.Entry(f, width=8, bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, insertbackground=Theme.FG_MAIN, relief="flat", font=Theme.FONT_SMALL, justify="center")
             e.insert(0, str(default_val))
             e.pack(side=tk.RIGHT)
             return e
@@ -32,23 +32,36 @@ class ControlPanel(tk.LabelFrame):
             labels = ["Inner R (r=\u0394r):", "Outer R (r=R):", "Start \u0398 (\u03B8=0):", "End \u0398 (\u03B8=\u0398):", "Start \u03A6 (\u03C6=0):", "End \u03A6 (\u03C6=\u03A6):"]
             title1, title2, title3 = "R Boundaries", "\u0398 Boundaries", "\u03A6 Boundaries"
 
-        grp_x = tk.LabelFrame(self.main_frame, text=title1, bg=Theme.BG_PANEL, fg=Theme.FG_SUB, bd=1, relief="ridge")
-        grp_x.pack(side=tk.LEFT, padx=10, pady=0, fill=tk.Y)
+        def add_separator():
+            tk.Frame(self.main_frame, width=1, bg=Theme.BORDER).pack(side=tk.LEFT, fill=tk.Y, padx=15, pady=5)
+
+        grp_x = tk.Frame(self.main_frame, bg=Theme.BG_PANEL)
+        grp_x.pack(side=tk.LEFT, padx=5, pady=0, fill=tk.Y)
+        tk.Label(grp_x, text=title1, font=('Segoe UI', 9, 'bold'), fg=Theme.FG_SUB, bg=Theme.BG_PANEL).pack(anchor="w", padx=5)
         self.inputs['left'] = add_input(grp_x, labels[0], 100)
         self.inputs['right'] = add_input(grp_x, labels[1], 50)
         
-        grp_y = tk.LabelFrame(self.main_frame, text=title2, bg=Theme.BG_PANEL, fg=Theme.FG_SUB, bd=1, relief="ridge")
-        grp_y.pack(side=tk.LEFT, padx=10, pady=0, fill=tk.Y)
+        add_separator()
+        
+        grp_y = tk.Frame(self.main_frame, bg=Theme.BG_PANEL)
+        grp_y.pack(side=tk.LEFT, padx=5, pady=0, fill=tk.Y)
+        tk.Label(grp_y, text=title2, font=('Segoe UI', 9, 'bold'), fg=Theme.FG_SUB, bg=Theme.BG_PANEL).pack(anchor="w", padx=5)
         self.inputs['front'] = add_input(grp_y, labels[2], 0)
         self.inputs['back'] = add_input(grp_y, labels[3], 100)
         
-        grp_z = tk.LabelFrame(self.main_frame, text=title3, bg=Theme.BG_PANEL, fg=Theme.FG_SUB, bd=1, relief="ridge")
-        grp_z.pack(side=tk.LEFT, padx=10, pady=0, fill=tk.Y)
+        add_separator()
+        
+        grp_z = tk.Frame(self.main_frame, bg=Theme.BG_PANEL)
+        grp_z.pack(side=tk.LEFT, padx=5, pady=0, fill=tk.Y)
+        tk.Label(grp_z, text=title3, font=('Segoe UI', 9, 'bold'), fg=Theme.FG_SUB, bg=Theme.BG_PANEL).pack(anchor="w", padx=5)
         self.inputs['bottom'] = add_input(grp_z, labels[4], 75)
         self.inputs['top'] = add_input(grp_z, labels[5], 25)
         
-        grp_sim = tk.LabelFrame(self.main_frame, text="Simulation", bg=Theme.BG_PANEL, fg=Theme.FG_SUB, bd=1, relief="ridge")
-        grp_sim.pack(side=tk.LEFT, padx=10, pady=0, fill=tk.Y)
+        add_separator()
+        
+        grp_sim = tk.Frame(self.main_frame, bg=Theme.BG_PANEL)
+        grp_sim.pack(side=tk.LEFT, padx=5, pady=0, fill=tk.Y)
+        tk.Label(grp_sim, text="Simulation", font=('Segoe UI', 9, 'bold'), fg=Theme.FG_SUB, bg=Theme.BG_PANEL).pack(anchor="w", padx=5)
         self.inputs['dx'] = add_input(grp_sim, "Grid Res:", 0.05)
         
         # Center the solve button inside the simulation group
