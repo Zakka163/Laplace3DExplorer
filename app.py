@@ -40,6 +40,12 @@ class Laplace3DApp(tk.Tk):
         self.Ly = val2
         self.Lz = val3
         
+        # Apply the selected theme to the root window and loading frame
+        self.configure(bg=Theme.BG_ROOT)
+        self.loading_frame.configure(bg=Theme.BG_ROOT)
+        for child in self.loading_frame.winfo_children():
+            child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
+        
         self.loading_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.update()
         
