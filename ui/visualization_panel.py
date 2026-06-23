@@ -42,9 +42,7 @@ class VisualizationPanel(tk.Frame):
         self.z_spin.pack(side=tk.TOP, pady=2)
         self.z_spin.bind('<Return>', self.on_spinbox_enter)
         self.z_spin.bind('<FocusOut>', self.on_spinbox_enter)
-        
-        self.lbl_z_slider = tk.Label(self.side_panel, text="Z Layer Index: 0", bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, font=Theme.FONT_SMALL)
-        self.lbl_z_slider.pack(side=tk.TOP, pady=(10, 2))
+        self.z_spin.bind('<KeyRelease>', self.on_spinbox_enter)
         
         self.z_var = tk.IntVar(value=0)
         # Vertical scale going from top to bottom (from_=10, to=0)
@@ -99,7 +97,10 @@ class VisualizationPanel(tk.Frame):
         
     def on_spinbox_enter(self, event=None):
         try:
-            target_z = float(self.z_spin_var.get())
+            val_str = self.z_spin.get().strip()
+            if not val_str:
+                return
+            target_z = float(val_str)
             X, Y, Z = self.get_physical_coordinates()
             Lz = Z[0, 0, -1]
             
@@ -114,8 +115,8 @@ class VisualizationPanel(tk.Frame):
             # Set slider, which triggers render_visualization
             self.z_var.set(closest_idx)
             self.render_visualization()
-        except ValueError:
-            pass # Invalid float
+        except Exception as e:
+            pass # Invalid/incomplete float typed during editing
 
     def on_scroll_zoom(self, event):
         if event.inaxes != self.ax:
@@ -259,9 +260,8 @@ class VisualizationPanel(tk.Frame):
                 self.z_var.set(curr_z)
                 
             physical_z = Z[0, 0, curr_z]
-            # Update spinbox and label with physical Z
+            # Update spinbox with physical Z
             self.z_spin_var.set(round(physical_z, 4))
-            self.lbl_z_slider.config(text=f"Z Layer Index: {curr_z}")
             
             X2D = X[:, :, curr_z]
             Y2D = Y[:, :, curr_z]
