@@ -13,9 +13,10 @@ classdef Laplace3DApp < handle
         % Visuals
         UIAxes
         VisDropdown
+        ZSlider
         
         % Dashboard Labels
-        LblIter, LblErr, LblTime, LblMaxT, LblMinT
+        LblIter, LblErr, LblTime, LblMaxT, LblMinT, LblCenterT
         
         % Data
         T, X, Y, Z
@@ -59,15 +60,21 @@ classdef Laplace3DApp < handle
             % --- CENTER PANEL ---
             obj.CenterPanel = uipanel(obj.GridLayout, 'Title', 'Visualization', 'BackgroundColor', [0.1 0.1 0.1], 'ForegroundColor', 'w');
             centerGrid = uigridlayout(obj.CenterPanel, [2 1]);
-            centerGrid.RowHeight = {30, '1x'};
+            centerGrid.RowHeight = {45, '1x'};
             centerGrid.BackgroundColor = [0.1 0.1 0.1];
             
-            topCenter = uigridlayout(centerGrid, [1 2]);
-            topCenter.ColumnWidth = {100, 200};
+            topCenter = uigridlayout(centerGrid, [1 4]);
+            topCenter.ColumnWidth = {80, 160, 60, '1x'};
+            topCenter.Padding = [0 5 0 5];
             topCenter.BackgroundColor = [0.1 0.1 0.1];
             uilabel(topCenter, 'Text', 'Visual Type:', 'FontColor', 'w');
-            obj.VisDropdown = uidropdown(topCenter, 'Items', {'Heatmap Z-Mid', 'Contour Z-Mid', 'Surface Z-Mid', 'Scatter 3D', 'Slice 3D', 'Isosurface'});
+            obj.VisDropdown = uidropdown(topCenter, 'Items', {'Heatmap 2D', 'Contour 2D', 'Surface 2D', 'Scatter 3D', 'Slice 3D', 'Isosurface'});
             obj.VisDropdown.ValueChangedFcn = @(~, ~) obj.renderVisualization();
+            
+            uilabel(topCenter, 'Text', 'Z Layer:', 'FontColor', 'w');
+            obj.ZSlider = uislider(topCenter, 'Limits', [1 10], 'Value', 5);
+            obj.ZSlider.ValueChangedFcn = @(~, ~) obj.renderVisualization();
+            obj.ZSlider.FontColor = 'w';
             
             obj.UIAxes = uiaxes(centerGrid);
             obj.UIAxes.Color = 'k'; obj.UIAxes.XColor = 'w'; obj.UIAxes.YColor = 'w'; obj.UIAxes.ZColor = 'w';
@@ -75,7 +82,7 @@ classdef Laplace3DApp < handle
             % --- RIGHT PANEL ---
             obj.RightPanel = uipanel(obj.GridLayout, 'Title', 'Dashboard & Export', 'BackgroundColor', [0.15 0.15 0.15], 'ForegroundColor', 'w');
             rightGrid = uigridlayout(obj.RightPanel, [10 1]);
-            rightGrid.RowHeight = {22, 22, 22, 22, 22, '1x', 30, 30, 30, 30};
+            rightGrid.RowHeight = {22, 22, 22, 22, 22, 22, '1x', 30, 30, 30};
             rightGrid.BackgroundColor = [0.15 0.15 0.15];
             
             obj.LblTime = obj.addLabel(rightGrid, 'Time: - s');
@@ -83,6 +90,7 @@ classdef Laplace3DApp < handle
             obj.LblErr = obj.addLabel(rightGrid, 'Error: -');
             obj.LblMaxT = obj.addLabel(rightGrid, 'Max Temp: -');
             obj.LblMinT = obj.addLabel(rightGrid, 'Min Temp: -');
+            obj.LblCenterT = obj.addLabel(rightGrid, 'Center Temp: -');
             
             btnPNG = uibutton(rightGrid, 'Text', 'Save PNG', 'ButtonPushedFcn', @(~,~) obj.exportData('png'));
             btnCSV = uibutton(rightGrid, 'Text', 'Export CSV', 'ButtonPushedFcn', @(~,~) obj.exportData('csv'));
@@ -124,6 +132,16 @@ classdef Laplace3DApp < handle
             obj.LblMaxT.Text = sprintf('Max Temp: %.2f', max(s.T(:)));
             obj.LblMinT.Text = sprintf('Min Temp: %.2f', min(s.T(:)));
             
+            mid_y = round(size(s.T, 1) / 2);
+            mid_x = round(size(s.T, 2) / 2);
+            mid_z = round(size(s.T, 3) / 2);
+            obj.LblCenterT.Text = sprintf('Center Temp: %.2f', s.T(mid_y, mid_x, mid_z));
+            
+            nz = size(s.T, 3);
+            obj.ZSlider.Limits = [1 nz];
+            obj.ZSlider.Value = mid_z;
+            obj.ZSlider.MajorTicks = [1 mid_z nz];
+            
             obj.UIFigure.Name = 'Laplace 3D Explorer';
             obj.renderVisualization();
         end
@@ -135,19 +153,19 @@ classdef Laplace3DApp < handle
             ax = obj.UIAxes;
             type = obj.VisDropdown.Value;
             
-            mid_z = round(size(obj.T, 3) / 2);
-            X2D = obj.X(:, :, mid_z); Y2D = obj.Y(:, :, mid_z); T2D = obj.T(:, :, mid_z);
+            curr_z = round(obj.ZSlider.Value);
+            X2D = obj.X(:, :, curr_z); Y2D = obj.Y(:, :, curr_z); T2D = obj.T(:, :, curr_z);
             
             switch type
-                case 'Heatmap Z-Mid'
+                case 'Heatmap 2D'
                     imagesc(ax, X2D(1,:), Y2D(:,1), T2D);
                     set(ax, 'YDir', 'normal'); axis(ax, 'equal', 'tight');
                     view(ax, 2);
-                case 'Contour Z-Mid'
+                case 'Contour 2D'
                     contourf(ax, X2D, Y2D, T2D, 20, 'LineColor', 'none');
                     axis(ax, 'equal', 'tight');
                     view(ax, 2);
-                case 'Surface Z-Mid'
+                case 'Surface 2D'
                     surf(ax, X2D, Y2D, T2D, 'EdgeColor', 'none');
                     view(ax, 3);
                 case 'Scatter 3D'
