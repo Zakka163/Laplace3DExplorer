@@ -29,26 +29,35 @@ class VisualizationPanel(tk.Frame):
         self.vis_cb.pack(side=tk.LEFT, padx=5)
         self.vis_cb.bind("<<ComboboxSelected>>", lambda e: self.render_visualization())
         
-        self.lbl_z_slider = tk.Label(top_center, text="Z Height:", bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
-        self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
+        # Main layout frame under top_center
+        content_frame = tk.Frame(self, bg=Theme.BG_ROOT)
+        content_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # Side panel for Z parameters
+        self.side_panel = tk.Frame(content_frame, bg=Theme.BG_ROOT)
+        
+        tk.Label(self.side_panel, text="Z Height (m)", bg=Theme.BG_ROOT, fg=Theme.FG_SUB, font=('Segoe UI', 9, 'bold')).pack(side=tk.TOP, pady=(5, 2))
+        self.z_spin_var = tk.DoubleVar(value=0.0)
+        self.z_spin = ttk.Spinbox(self.side_panel, from_=0.0, to=10.0, textvariable=self.z_spin_var, width=8, increment=0.1, command=self.on_spinbox_enter)
+        self.z_spin.pack(side=tk.TOP, pady=2)
+        self.z_spin.bind('<Return>', self.on_spinbox_enter)
+        self.z_spin.bind('<FocusOut>', self.on_spinbox_enter)
+        
+        self.lbl_z_slider = tk.Label(self.side_panel, text="Z Layer Index: 0", bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, font=Theme.FONT_SMALL)
+        self.lbl_z_slider.pack(side=tk.TOP, pady=(10, 2))
         
         self.z_var = tk.IntVar(value=0)
-        self.z_spin_var = tk.DoubleVar(value=0.0)
+        # Vertical scale going from top to bottom (from_=10, to=0)
+        self.z_slider = tk.Scale(self.side_panel, from_=10, to=0, orient=tk.VERTICAL, bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, highlightthickness=0, variable=self.z_var, showvalue=False, resolution=1, length=300, command=lambda v: self.render_visualization())
+        self.z_slider.pack(side=tk.TOP, fill=tk.Y, expand=True, pady=5)
         
-        self.z_spin = ttk.Spinbox(top_center, from_=0.0, to=10.0, textvariable=self.z_spin_var, width=8, increment=0.1)
-        self.z_spin.pack(side=tk.LEFT, padx=2)
-        self.z_spin.bind('<Return>', self.on_spinbox_enter)
-        
-        # We set resolution=1 explicitly so the slider moves in integer steps (index layers)
-        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, highlightthickness=0, variable=self.z_var, showvalue=False, resolution=1, length=250, command=lambda v: self.render_visualization())
-        self.z_slider.pack(side=tk.LEFT, padx=5)
+        # Canvas Frame (Plot Area)
+        canvas_frame = tk.Frame(content_frame, bg=Theme.BG_ROOT)
+        canvas_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         self.fig = Figure(figsize=(6, 5), dpi=100)
         self.fig.patch.set_facecolor(Theme.BG_ROOT)
         self.ax = self.fig.add_subplot(111)
-        
-        canvas_frame = tk.Frame(self, bg=Theme.BG_ROOT)
-        canvas_frame.pack(fill=tk.BOTH, expand=True)
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=canvas_frame)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
@@ -61,14 +70,18 @@ class VisualizationPanel(tk.Frame):
         
     def apply_theme(self):
         self.configure(bg=Theme.BG_ROOT)
-        for widget in self.winfo_children():
-            if isinstance(widget, tk.Frame):
-                widget.configure(bg=Theme.BG_ROOT)
-                for child in widget.winfo_children():
-                    if isinstance(child, tk.Label):
-                        child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
-                    elif isinstance(child, tk.Scale):
-                        child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
+        
+        def recurse(parent):
+            for child in parent.winfo_children():
+                if isinstance(child, (tk.Frame, tk.LabelFrame)):
+                    child.configure(bg=Theme.BG_ROOT)
+                    recurse(child)
+                elif isinstance(child, tk.Label):
+                    child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
+                elif isinstance(child, tk.Scale):
+                    child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
+                    
+        recurse(self)
         
         self.fig.patch.set_facecolor(Theme.BG_ROOT)
         if hasattr(self, 'ax') and self.ax is not None:
@@ -85,16 +98,17 @@ class VisualizationPanel(tk.Frame):
         self.canvas.mpl_connect('scroll_event', self.on_scroll_zoom)
         
     def on_spinbox_enter(self, event=None):
-        if self.app.solver_res is None:
-            return
         try:
             target_z = float(self.z_spin_var.get())
+            X, Y, Z = self.get_physical_coordinates()
+            Lz = Z[0, 0, -1]
+            
             # Clamp to physical bounds
             if target_z < 0: target_z = 0.0
-            if target_z > self.app.solver_res.Lz: target_z = self.app.solver_res.Lz
+            if target_z > Lz: target_z = Lz
             
             # Find the closest layer index
-            Z_1D = self.app.solver_res.Z[0, 0, :]
+            Z_1D = Z[0, 0, :]
             closest_idx = (np.abs(Z_1D - target_z)).argmin()
             
             # Set slider, which triggers render_visualization
@@ -187,13 +201,15 @@ class VisualizationPanel(tk.Frame):
             print(f"[INFO] Rendering Visual: {v_type}")
             
             if "2D" in v_type or v_type == "Cutaway 3D":
-                self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
-                self.z_spin.pack(side=tk.LEFT, padx=2)
-                self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+                self.side_panel.pack(side=tk.RIGHT, fill=tk.Y, padx=10)
+                
+                # Dynamically set boundaries of Slider and Spinbox based on geometry
+                _, _, Z_phys = self.get_physical_coordinates()
+                max_idx = Z_phys.shape[2] - 1
+                self.z_slider.configure(from_=max_idx, to=0)
+                self.z_spin.configure(from_=0.0, to=float(Z_phys[0, 0, -1]))
             else:
-                self.lbl_z_slider.pack_forget()
-                self.z_spin.pack_forget()
-                self.z_slider.pack_forget()
+                self.side_panel.pack_forget()
                 
             if self.current_v_type != v_type:
                 self.fig.clf()
