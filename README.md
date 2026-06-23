@@ -1,110 +1,102 @@
-# Laplace 3D Explorer
+<div align="center">
+  <h1>🌡️ Laplace 3D Explorer</h1>
+  <p><b>A High-Performance MATLAB Solver & Scientific Visualization Tool for 3D Heat Distribution</b></p>
+  
+  [![MATLAB](https://img.shields.io/badge/Made_with-MATLAB-blue.svg)](https://www.mathworks.com/)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+  [![Status](https://img.shields.io/badge/Status-Completed-success.svg)]()
+</div>
 
-![MATLAB](https://img.shields.io/badge/MATLAB-Simulation-blue)
-![Physics](https://img.shields.io/badge/Computational-Physics-orange)
-![Numerical Methods](https://img.shields.io/badge/Numerical-Methods-success)
+<br/>
 
-**Laplace 3D Explorer** adalah aplikasi berbasis MATLAB untuk menyelesaikan dan memvisualisasikan distribusi temperatur tiga dimensi. Aplikasi ini dirancang sebagai alat pembelajaran Numerical Methods dan Computational Physics dengan memberikan pengalaman visual interaktif yang menyerupai CT Scan atau MRI Viewer.
+## 📖 Overview
+
+**Laplace 3D Explorer** is a robust, modular, and interactive MATLAB application designed to solve the 3D Laplace equation ($\nabla^2 T = 0$) using high-performance numerical methods. It acts as a "Mini COMSOL" specifically tailored for educational and computational physics purposes. 
+
+Featuring a fully integrated Graphical User Interface (GUI), the software allows researchers and students to configure boundary conditions, execute the Successive Over-Relaxation (SOR) solver, and instantly render breathtaking volumetric visualizations comparable to CT Scan or MRI viewers.
 
 ---
 
-## Project Overview
+## ✨ Key Features
 
-Tujuan utama proyek ini adalah memungkinkan pengguna untuk mengeksplorasi distribusi temperatur dalam volume 3D secara interaktif. Solver dibangun untuk menyelesaikan Persamaan Laplace menggunakan beberapa metode numerik:
-* **Finite Difference Method (FDM)**
-* **Gauss-Seidel Method**
-* **Successive Over Relaxation (SOR)**
+- ⚡ **Optimized Numerical Core**: Uses an efficient class-based 3D Solver utilizing the SOR (Successive Over-Relaxation) algorithm capable of handling millions of grid nodes seamlessly.
+- 🎛️ **Interactive Programmatic GUI**: No coding required! A clean, single-window application built natively using `uifigure` to control boundaries and solver parameters in real-time.
+- 📊 **Scientific Dashboard**: Live metrics tracking including calculation time, convergence error, iteration count, and absolute temperature extremes.
+- 🎨 **Advanced 3D Volumetric Visualization**: Includes a rich suite of visual modes:
+  - `Orthogonal Viewer` & `Slice 3D`: Navigate through Z/Y/X layers just like medical imaging software.
+  - `Isosurface 3D`: Renders dynamic temperature-boundary shells with Gouraud lighting.
+  - `Scatter 3D`: Plots thermal point clouds with automated memory-safe downsampling.
+  - `Heatmap` & `Contour`: Classic 2D mid-plane projections.
+- 💾 **Data Export**: Save thermal arrays to `.csv`, `.mat`, or render high-resolution `.png` graphics with a single click.
 
-## Mathematical Background
+---
 
-Aplikasi ini menyelesaikan persamaan Laplace 3D:
+## 🚀 Getting Started
 
-$$ \nabla^2 T = 0 $$
+### Prerequisites
+- **MATLAB R2020b or newer** (Recommended for `uifigure` and `uigridlayout` full support).
 
-atau dalam bentuk diferensial parsial:
+### Installation & Launch
+1. Clone this repository or extract the project folder.
+2. Open MATLAB and navigate to the project's root directory (`Laplace3DExplorer`).
+3. To launch the GUI application, simply type the following command in the **Command Window**:
+   ```matlab
+   runApp
+   ```
+4. The Laplace 3D Explorer interface will launch instantly!
+
+---
+
+## 🧮 Mathematical Background
+
+The application solves the steady-state heat equation (Laplace's equation) in three dimensions:
 
 $$ \frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} + \frac{\partial^2 T}{\partial z^2} = 0 $$
 
-Diskretisasi menggunakan Finite Difference:
+We discretize the domain using the **Finite Difference Method**:
 
 $$ T_{i,j,k} = \frac{T_{i+1,j,k} + T_{i-1,j,k} + T_{i,j+1,k} + T_{i,j-1,k} + T_{i,j,k+1} + T_{i,j,k-1}}{6} $$
 
-Iterasi menggunakan metode SOR (Successive Over Relaxation):
+To dramatically accelerate convergence on massive grids (e.g. 8+ million nodes), the solver implements the **Successive Over-Relaxation (SOR)** algorithm:
 
 $$ T^{new} = T^{old} + \omega (T_{GS}-T^{old}) $$
 
-## Project Goals
+Where $\omega$ is the relaxation factor (typically between $1.0$ and $2.0$).
 
-### Educational Goals
-Pengguna diharapkan dapat memahami konsep-konsep berikut secara mendalam:
-- Persamaan Laplace & Finite Difference Method
-- Grid 3D & Boundary Condition
-- Iterative Solver (Gauss-Seidel, SOR)
-- Konvergensi Iteratif & Error Analysis
+---
 
-### Technical Goals
-Membangun aplikasi yang:
-- Modular, mudah dikembangkan, dan mudah dipelihara.
-- Memisahkan secara jelas antara Layer GUI, Visualization, Solver, dan Mathematical Core.
-- Dapat diperluas untuk Heat Equation dan Poisson Equation di masa depan.
+## 📂 Architecture & Directory Structure
 
-## Target Users
-- Mahasiswa Fisika, Teknik Elektro, Mesin, dan Sipil
-- Enthusiast Computational Physics & Pembelajar Numerical Methods
-
-## System Architecture
-
-Arsitektur aplikasi dirancang modular agar Solver independen dari GUI, dan Visualisasi tidak melakukan kalkulasi numerik.
-
-```text
-GUI Layer
-    ↓
-Visualization Layer
-    ↓
-Solver Layer
-    ↓
-Mathematical Core
-```
-
-### Folder Structure
+The project strictly adheres to **Clean Code** principles and the **Single Responsibility Principle**. 
 
 ```text
 Laplace3DExplorer/
-├── main.m
-├── solver/
-│   └── solver3D.m
-├── visualization/
-│   ├── showHeatmap.m
-│   ├── showContour.m
-│   ├── showSurface.m
-│   ├── showScatter3D.m
-│   ├── showSlice3D.m
-│   └── showIsosurface.m
+├── runApp.m                  # App launcher script
+├── main.m                    # Headless benchmarking & testing script
 ├── gui/
-│   └── Laplace3DExplorer.mlapp
-└── docs/
+│   └── Laplace3DApp.m        # The unified programmatic GUI class
+├── solver/
+│   └── solver3D.m            # The core numerical object-oriented solver
+└── visualization/            # Modular plotting engines
+    ├── orthogonalViewer.m
+    ├── showContour.m
+    ├── showHeatmap.m
+    ├── showIsosurface.m
+    ├── showScatter3D.m
+    ├── showSlice3D.m
+    ├── showSurface.m
+    └── sliceViewer.m
 ```
 
-## Features & Roadmap
+---
 
-Aplikasi dikembangkan dalam berbagai fase yang mencakup:
-- **Numerical Core**: Domain/Grid Generation, Boundary Conditions, SOR Solver, Error Calculation.
-- **2D/3D Visualization**: Heatmap, Contour, Surface, Scatter Volume, Slice Volume, Isosurface.
-- **CT Scan & Orthogonal Viewer**: Navigasi layer-by-layer (Z Layer) dan tampilan 3 arah (XY, XZ, YZ Plane).
-- **Interactive Boundary Conditions**: Ubah nilai batas (Kiri, Kanan, Depan, Belakang, Atas, Bawah) secara real-time.
-- **Simulation Control Panel**: Kontrol Grid Size, Omega ($\omega$), Tolerance, dan Max Iterations.
-- **Scientific Dashboard**: Metrik seperti iterasi, residual error, suhu minimum/maksimum/rata-rata/pusat.
-- **Data Export**: Ekspor visualisasi ke PNG/JPG dan data ke CSV/MAT.
+## 🔮 Future Extensions
+The modular foundation of Laplace 3D Explorer is specifically designed to be easily expanded into:
+- **Heat Equation Solvers** (Time-dependent diffusion $\frac{\partial T}{\partial t} = \alpha \nabla^2 T$)
+- **Poisson Equation Solvers** (Internal heat generation $\nabla^2 T = f(x,y,z)$)
+- **Electrostatics** (Electric potential simulations $\nabla^2 V = 0$)
 
-## Future Extensions
+---
 
-Aplikasi ini diproyeksikan untuk menjadi fondasi bagi simulator fisika yang lebih kompleks, seperti:
-- **Heat Equation Solver** ($\frac{\partial T}{\partial t} = \alpha \nabla^2 T$)
-- **Poisson Equation Solver** ($\nabla^2 T = f(x,y,z)$)
-- **Electrostatic Potential Solver** ($\nabla^2 V = 0$)
-- **Diffusion Simulation & Mini COMSOL-Style Simulator**
-
-## Coding Standards
-- Mengutamakan *Modular Functions* dan *Single Responsibility Principle*.
-- Memisahkan fungsionalitas Solver dan Visualization.
-- Menggunakan praktik terbaik MATLAB untuk performa dan skalabilitas kode.
+## 📄 License
+This project is open-source and free to use for academic, research, and educational purposes.
