@@ -3,6 +3,13 @@ from tkinter import ttk, messagebox, filedialog
 import time
 import os
 
+# Initialize globals to None to satisfy IDE static analyzers (Pylance/Pyright)
+np = None
+FigureCanvasTkAgg = None
+Figure = None
+Solver3D = None
+plotter = None
+
 class Laplace3DApp(tk.Tk):
     def __init__(self):
         super().__init__()
