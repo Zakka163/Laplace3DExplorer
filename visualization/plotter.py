@@ -24,6 +24,10 @@ def plot_scatter3d(ax, X, Y, Z, T):
     step = max(1, int(np.ceil(T.size / 5000)))
     Xs, Ys, Zs, Ts = X.flat[::step], Y.flat[::step], Z.flat[::step], T.flat[::step]
     sc = ax.scatter(Xs, Ys, Zs, c=Ts, cmap='jet', alpha=0.6, s=10)
+    
+    # Force 3D aspect ratio to match physical dimensions
+    ax.set_box_aspect((np.ptp(X), np.ptp(Y), np.ptp(Z)))
+    
     ax.set_title("Scatter 3D", color='white')
     return sc
 
@@ -34,6 +38,10 @@ def plot_isosurface(ax, X, Y, Z, T):
         # skimage marching cubes returns (vertices, faces, normals, values)
         verts, faces, _, _ = measure.marching_cubes(T, val, spacing=(X[0,1,0]-X[0,0,0], Y[1,0,0]-Y[0,0,0], Z[0,0,1]-Z[0,0,0]))
         ax.plot_trisurf(verts[:, 0], verts[:, 1], faces, verts[:, 2], color='red', alpha=0.8, edgecolor='none')
+        
+        # Force 3D aspect ratio to match physical dimensions
+        ax.set_box_aspect((np.ptp(X), np.ptp(Y), np.ptp(Z)))
+        
         ax.set_title(f"Isosurface (T = {val:.2f})", color='white')
     except Exception as e:
         ax.set_title("Error computing isosurface", color='white')
@@ -69,5 +77,8 @@ def plot_domain_geometry(ax, Lx, Ly, Lz):
     ax.set_xlim([-0.1 * Lx, 1.1 * Lx if Lx > 0 else 1.0])
     ax.set_ylim([-0.1 * Ly, 1.1 * Ly if Ly > 0 else 1.0])
     ax.set_zlim([-0.1 * Lz, 1.1 * Lz if Lz > 0 else 1.0])
+    
+    # Force 3D aspect ratio to match physical dimensions
+    ax.set_box_aspect((Lx, Ly, Lz))
     
     return None
