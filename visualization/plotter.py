@@ -4,7 +4,7 @@ from ui.theme import Theme
 
 def plot_heatmap(ax, X2D, Y2D, T2D):
     ax.clear()
-    img = ax.pcolormesh(X2D, Y2D, T2D, shading='gouraud', cmap='jet')
+    img = ax.pcolormesh(X2D, Y2D, T2D, shading='auto', cmap='jet')
     ax.set_title("Heatmap 2D", color=Theme.FG_MAIN)
     return img
 

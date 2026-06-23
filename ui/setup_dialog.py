@@ -16,15 +16,11 @@ class SetupDialog:
         style.configure('Title.TLabel', background=Theme.BG_ROOT, foreground=Theme.ACCENT_HOVER, font=Theme.FONT_TITLE)
         style.configure('Setup.TCombobox', fieldbackground=Theme.BG_INPUT, background=Theme.BORDER, foreground=Theme.FG_MAIN, font=Theme.FONT_REGULAR)
         
-        self.setup_frame = ttk.Frame(parent, style='Setup.TFrame')
+        self.setup_frame = tk.Frame(parent, bg=Theme.BG_PANEL, highlightthickness=1, highlightbackground=Theme.BORDER, padx=40, pady=40)
         self.setup_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
-        # Add a subtle border/panel effect using a canvas
-        canvas = tk.Canvas(self.setup_frame, bg=Theme.BG_PANEL, highlightthickness=1, highlightbackground=Theme.BORDER)
-        canvas.pack(fill=tk.BOTH, expand=True, ipadx=40, ipady=40)
-        
-        inner_frame = tk.Frame(canvas, bg=Theme.BG_PANEL)
-        inner_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        inner_frame = tk.Frame(self.setup_frame, bg=Theme.BG_PANEL)
+        inner_frame.pack(fill=tk.BOTH, expand=True)
         
         ttk.Label(inner_frame, text="Laplace 3D Explorer", style='Title.TLabel', background=Theme.BG_PANEL).pack(pady=(0, 5))
         ttk.Label(inner_frame, text="Define Coordinate System & Domain Size", style='Setup.TLabel', background=Theme.BG_PANEL, font=('Segoe UI', 11, 'italic'), foreground=Theme.FG_SUB).pack(pady=(0, 25))
