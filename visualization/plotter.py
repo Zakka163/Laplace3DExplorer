@@ -69,35 +69,35 @@ def plot_cutaway3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
     norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
     cmap = cm.jet
     
-    # Calculate strides to downsample grids to max ~30x30 patches for fast rendering
+    # Calculate strides to downsample grids to max ~60x60 patches for smoother rendering
     ny, nx, nz = T.shape
-    sy = max(1, ny // 30)
-    sx = max(1, nx // 30)
-    sz = max(1, (z_idx + 1) // 30)
+    sy = max(1, ny // 60)
+    sx = max(1, nx // 60)
+    sz = max(1, (z_idx + 1) // 60)
     
     # 2. Top Face (Z = z_idx)
     surf_top = ax.plot_surface(X[::sy, ::sx, z_idx], Y[::sy, ::sx, z_idx], Z[::sy, ::sx, z_idx], 
-                               facecolors=cmap(norm(T[::sy, ::sx, z_idx])), shade=False)
+                               facecolors=cmap(norm(T[::sy, ::sx, z_idx])), shade=False, linewidth=0, antialiased=True)
                      
     # 3. Bottom Face (Z = 0)
     ax.plot_surface(X[::sy, ::sx, 0], Y[::sy, ::sx, 0], Z[::sy, ::sx, 0], 
-                    facecolors=cmap(norm(T[::sy, ::sx, 0])), shade=False)
+                    facecolors=cmap(norm(T[::sy, ::sx, 0])), shade=False, linewidth=0, antialiased=True)
                 
     # 4. Front Face (Y = 0)
     ax.plot_surface(X[0, ::sx, :z_idx+1:sz], Y[0, ::sx, :z_idx+1:sz], Z[0, ::sx, :z_idx+1:sz], 
-                    facecolors=cmap(norm(T[0, ::sx, :z_idx+1:sz])), shade=False)
+                    facecolors=cmap(norm(T[0, ::sx, :z_idx+1:sz])), shade=False, linewidth=0, antialiased=True)
                 
     # 5. Back Face (Y = Ly)
     ax.plot_surface(X[-1, ::sx, :z_idx+1:sz], Y[-1, ::sx, :z_idx+1:sz], Z[-1, ::sx, :z_idx+1:sz], 
-                    facecolors=cmap(norm(T[-1, ::sx, :z_idx+1:sz])), shade=False)
+                    facecolors=cmap(norm(T[-1, ::sx, :z_idx+1:sz])), shade=False, linewidth=0, antialiased=True)
                 
     # 6. Left Face (X = 0)
     ax.plot_surface(X[::sy, 0, :z_idx+1:sz], Y[::sy, 0, :z_idx+1:sz], Z[::sy, 0, :z_idx+1:sz], 
-                    facecolors=cmap(norm(T[::sy, 0, :z_idx+1:sz])), shade=False)
+                    facecolors=cmap(norm(T[::sy, 0, :z_idx+1:sz])), shade=False, linewidth=0, antialiased=True)
                 
     # 7. Right Face (X = Lx)
     ax.plot_surface(X[::sy, -1, :z_idx+1:sz], Y[::sy, -1, :z_idx+1:sz], Z[::sy, -1, :z_idx+1:sz], 
-                    facecolors=cmap(norm(T[::sy, -1, :z_idx+1:sz])), shade=False)
+                    facecolors=cmap(norm(T[::sy, -1, :z_idx+1:sz])), shade=False, linewidth=0, antialiased=True)
     
     ax.set_xlim3d(X.min(), X.max())
     ax.set_ylim3d(Y.min(), Y.max())
