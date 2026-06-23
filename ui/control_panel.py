@@ -1,4 +1,6 @@
 import tkinter as tk
+from PIL import Image, ImageTk
+import os
 from ui.theme import Theme
 
 class ControlPanel(tk.LabelFrame):
@@ -67,7 +69,16 @@ class ControlPanel(tk.LabelFrame):
         # Center the solve button inside the simulation group
         btn_frame = tk.Frame(grp_sim, bg=Theme.BG_PANEL)
         btn_frame.pack(side=tk.TOP, fill=tk.X, pady=5, padx=5)
-        self.solve_btn = tk.Button(btn_frame, text="▶  SOLVE", bg=Theme.SUCCESS, fg=Theme.SUCCESS_FG, font=Theme.FONT_BOLD, relief="flat", command=self.solve_callback)
+        
+        # Load and resize the play icon
+        icon_path = os.path.join("assets", "play_icon.png")
+        if os.path.exists(icon_path):
+            img = Image.open(icon_path).resize((14, 14), Image.Resampling.LANCZOS)
+            self.play_icon = ImageTk.PhotoImage(img)
+            self.solve_btn = tk.Button(btn_frame, text=" SOLVE", image=self.play_icon, compound=tk.LEFT, bg=Theme.SUCCESS, fg=Theme.SUCCESS_FG, font=Theme.FONT_BOLD, relief="flat", command=self.solve_callback)
+        else:
+            self.solve_btn = tk.Button(btn_frame, text="▶ SOLVE", bg=Theme.SUCCESS, fg=Theme.SUCCESS_FG, font=Theme.FONT_BOLD, relief="flat", command=self.solve_callback)
+            
         self.solve_btn.pack(fill=tk.X)
         self.solve_btn.bind("<Enter>", lambda e: self.solve_btn.config(bg=Theme.SUCCESS_HOVER))
         self.solve_btn.bind("<Leave>", lambda e: self.solve_btn.config(bg=Theme.SUCCESS))
