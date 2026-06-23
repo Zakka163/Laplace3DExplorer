@@ -1,22 +1,23 @@
 import numpy as np
 from skimage import measure
+from ui.theme import Theme
 
 def plot_heatmap(ax, X2D, Y2D, T2D):
     ax.clear()
     img = ax.pcolormesh(X2D, Y2D, T2D, shading='gouraud', cmap='jet')
-    ax.set_title("Heatmap 2D", color='white')
+    ax.set_title("Heatmap 2D", color=Theme.FG_MAIN)
     return img
 
 def plot_contour(ax, X2D, Y2D, T2D):
     ax.clear()
     ct = ax.contourf(X2D, Y2D, T2D, levels=20, cmap='jet')
-    ax.set_title("Contour 2D", color='white')
+    ax.set_title("Contour 2D", color=Theme.FG_MAIN)
     return ct
 
 def plot_surface(ax, X2D, Y2D, T2D):
     ax.clear()
     surf = ax.plot_surface(X2D, Y2D, T2D, cmap='jet', edgecolor='none')
-    ax.set_title("Surface 2D", color='white')
+    ax.set_title("Surface 2D", color=Theme.FG_MAIN)
     return surf
 
 def plot_scatter3d(ax, X, Y, Z, T):
@@ -24,7 +25,7 @@ def plot_scatter3d(ax, X, Y, Z, T):
     step = max(1, int(np.ceil(T.size / 5000)))
     Xs, Ys, Zs, Ts = X.flat[::step], Y.flat[::step], Z.flat[::step], T.flat[::step]
     sc = ax.scatter(Xs, Ys, Zs, c=Ts, cmap='jet', alpha=0.6, s=10)
-    ax.set_title("Scatter 3D", color='white')
+    ax.set_title("Scatter 3D", color=Theme.FG_MAIN)
     return sc
 
 def plot_isosurface(ax, X, Y, Z, T):
@@ -59,27 +60,27 @@ def plot_isosurface(ax, X, Y, Z, T):
         verts[:, 2] += Z_sub.min()
         
         ax.plot_trisurf(verts[:, 0], verts[:, 1], faces, verts[:, 2], color='red', alpha=0.8, edgecolor='none')
-        ax.set_title(f"Isosurface (T = {val:.2f})", color='white')
+        ax.set_title(f"Isosurface (T = {val:.2f})", color=Theme.FG_MAIN)
     except Exception as e:
-        ax.set_title("Error computing isosurface", color='white')
+        ax.set_title("Error computing isosurface", color=Theme.FG_MAIN)
         print(f"Isosurface Error: {e}")
     return None
 
 def plot_domain_geometry(ax, X, Y, Z):
     ax.clear()
     
-    # Draw the bounding surface of the domain
+    # Draw the bounding surface of the domain with a visible wireframe representing the grid
     # Top and Bottom faces
-    ax.plot_surface(X[:, :, -1], Y[:, :, -1], Z[:, :, -1], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
-    ax.plot_surface(X[:, :, 0], Y[:, :, 0], Z[:, :, 0], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
+    ax.plot_surface(X[:, :, -1], Y[:, :, -1], Z[:, :, -1], color='cyan', alpha=0.3, edgecolor=Theme.FG_SUB, linewidth=0.5, antialiased=True)
+    ax.plot_surface(X[:, :, 0], Y[:, :, 0], Z[:, :, 0], color='cyan', alpha=0.3, edgecolor=Theme.FG_SUB, linewidth=0.5, antialiased=True)
     # Front and Back faces
-    ax.plot_surface(X[0, :, :], Y[0, :, :], Z[0, :, :], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
-    ax.plot_surface(X[-1, :, :], Y[-1, :, :], Z[-1, :, :], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
+    ax.plot_surface(X[0, :, :], Y[0, :, :], Z[0, :, :], color='cyan', alpha=0.3, edgecolor=Theme.FG_SUB, linewidth=0.5, antialiased=True)
+    ax.plot_surface(X[-1, :, :], Y[-1, :, :], Z[-1, :, :], color='cyan', alpha=0.3, edgecolor=Theme.FG_SUB, linewidth=0.5, antialiased=True)
     # Left and Right faces
-    ax.plot_surface(X[:, 0, :], Y[:, 0, :], Z[:, 0, :], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
-    ax.plot_surface(X[:, -1, :], Y[:, -1, :], Z[:, -1, :], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
+    ax.plot_surface(X[:, 0, :], Y[:, 0, :], Z[:, 0, :], color='cyan', alpha=0.3, edgecolor=Theme.FG_SUB, linewidth=0.5, antialiased=True)
+    ax.plot_surface(X[:, -1, :], Y[:, -1, :], Z[:, -1, :], color='cyan', alpha=0.3, edgecolor=Theme.FG_SUB, linewidth=0.5, antialiased=True)
 
-    ax.set_title("Domain Geometry", color='white')
+    ax.set_title("Domain Geometry", color=Theme.FG_MAIN)
     ax.set_xlim([X.min(), X.max()])
     ax.set_ylim([Y.min(), Y.max()])
     ax.set_zlim([Z.min(), Z.max()])
@@ -129,7 +130,7 @@ def plot_cutaway3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
     ax.set_zlim3d(Z.min(), Z.max())
     
     z_val = Z[0, 0, z_idx]
-    ax.set_title(f"Cutaway 3D (Z ≤ {z_val:.2f})", color='white')
+    ax.set_title(f"Cutaway 3D (Z \u2264 {z_val:.2f})", color=Theme.FG_MAIN)
     
     # Create a mappable for the colorbar
     m = cm.ScalarMappable(cmap=cmap, norm=norm)

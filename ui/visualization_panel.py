@@ -126,9 +126,15 @@ class VisualizationPanel(tk.Frame):
 
     def get_physical_coordinates(self):
         if not hasattr(self.app, 'solver_res') or self.app.solver_res is None:
-            # Generate a dummy grid for initial Domain Geometry rendering
+            # Generate a dummy grid based on input resolution if possible
             Lx, Ly, Lz = self.app.Lx, self.app.Ly, self.app.Lz
-            nx, ny, nz = 40, 40, 40
+            try:
+                dx = float(self.app.control_panel.inputs['dx'].get())
+                nx = max(2, int(Lx / dx) + 1)
+                ny = max(2, int(Ly / dx) + 1)
+                nz = max(2, int(Lz / dx) + 1)
+            except:
+                nx, ny, nz = 40, 40, 40
             if self.app.coord_sys == "Cartesian":
                 x = np.linspace(0, Lx, nx)
                 y = np.linspace(0, Ly, ny)
