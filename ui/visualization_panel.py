@@ -186,9 +186,17 @@ class VisualizationPanel(tk.Frame):
             if v_type == "Domain Geometry":
                 X_phys, Y_phys, Z_phys = self.get_physical_coordinates()
                 plotter.plot_domain_geometry(self.ax, X_phys, Y_phys, Z_phys)
-                self.ax.set_xlabel('X')
-                self.ax.set_ylabel('Y')
-                self.ax.set_zlabel('Z')
+                coord_sys = self.app.coord_sys if hasattr(self.app, 'coord_sys') else "Cartesian"
+                if coord_sys == "Cylindrical":
+                    xl, yl, zl = 'X (R cos \u03B8)', 'Y (R sin \u03B8)', 'Z'
+                elif coord_sys == "Spherical":
+                    xl, yl, zl = 'X (R sin\u03B8 cos\u03C6)', 'Y (R sin\u03B8 sin\u03C6)', 'Z (R cos\u03B8)'
+                else:
+                    xl, yl, zl = 'X Axis', 'Y Axis', 'Z Axis'
+                
+                self.ax.set_xlabel(xl, color=Theme.FG_MAIN)
+                self.ax.set_ylabel(yl, color=Theme.FG_MAIN)
+                self.ax.set_zlabel(zl, color=Theme.FG_MAIN)
                 self.canvas.draw()
                 return
                 
@@ -240,10 +248,18 @@ class VisualizationPanel(tk.Frame):
                 
             self.update_aspect_ratio()
             
-            self.ax.set_xlabel('X Axis', color='white', fontsize=10)
-            self.ax.set_ylabel('Y Axis', color='white', fontsize=10)
+            coord_sys = self.app.coord_sys if hasattr(self.app, 'coord_sys') else "Cartesian"
+            if coord_sys == "Cylindrical":
+                xl, yl, zl = 'X (R cos \u03B8)', 'Y (R sin \u03B8)', 'Z Axis'
+            elif coord_sys == "Spherical":
+                xl, yl, zl = 'X (R sin\u03B8 cos\u03C6)', 'Y (R sin\u03B8 sin\u03C6)', 'Z (R cos\u03B8)'
+            else:
+                xl, yl, zl = 'X Axis', 'Y Axis', 'Z Axis'
+                
+            self.ax.set_xlabel(xl, color=Theme.FG_MAIN, fontsize=10)
+            self.ax.set_ylabel(yl, color=Theme.FG_MAIN, fontsize=10)
             if hasattr(self.ax, 'set_zlabel'):
-                self.ax.set_zlabel('Z Axis', color='white', fontsize=10)
+                self.ax.set_zlabel(zl, color=Theme.FG_MAIN, fontsize=10)
                 
             self.fig.tight_layout()
             self.canvas.draw()
