@@ -128,9 +128,9 @@ class Laplace3DApp(tk.Tk):
         
         tk.Label(top_center, text="Visual Type:", bg="#1E1E1E", fg="white").pack(side=tk.LEFT, padx=5)
         self.vis_type = tk.StringVar(value="Domain Geometry")
-        vis_cb = ttk.Combobox(top_center, textvariable=self.vis_type, values=["Domain Geometry", "Heatmap 2D", "Contour 2D", "Surface 2D", "Scatter 3D", "Isosurface"], state="readonly")
-        vis_cb.pack(side=tk.LEFT, padx=5)
-        vis_cb.bind("<<ComboboxSelected>>", lambda e: self.render_visualization())
+        self.vis_cb = ttk.Combobox(top_center, textvariable=self.vis_type, values=["Domain Geometry"], state="readonly")
+        self.vis_cb.pack(side=tk.LEFT, padx=5)
+        self.vis_cb.bind("<<ComboboxSelected>>", lambda e: self.render_visualization())
         
         self.lbl_z_slider = tk.Label(top_center, text="Z Layer:", bg="#1E1E1E", fg="white")
         self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
@@ -193,6 +193,10 @@ class Laplace3DApp(tk.Tk):
             
             self.z_slider.config(to=nz-1)
             self.z_slider.set(nz//2)
+            
+            # Unlock all visual types after solving
+            self.vis_cb.config(values=["Domain Geometry", "Heatmap 2D", "Contour 2D", "Surface 2D", "Scatter 3D", "Isosurface"])
+            self.vis_type.set("Heatmap 2D") # Automatically switch to a data view
             
             self.title("Laplace 3D Explorer")
             self.render_visualization()
