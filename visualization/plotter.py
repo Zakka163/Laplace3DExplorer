@@ -39,3 +39,29 @@ def plot_isosurface(ax, X, Y, Z, T):
         ax.set_title("Error computing isosurface", color='white')
         print(f"Isosurface Error: {e}")
     return None
+
+def plot_domain_geometry(ax, Lx, Ly, Lz):
+    ax.clear()
+    
+    corners = np.array([
+        [0, 0, 0], [Lx, 0, 0], [Lx, Ly, 0], [0, Ly, 0],
+        [0, 0, Lz], [Lx, 0, Lz], [Lx, Ly, Lz], [0, Ly, Lz]
+    ])
+    
+    edges = [
+        [0,1], [1,2], [2,3], [3,0],
+        [4,5], [5,6], [6,7], [7,4],
+        [0,4], [1,5], [2,6], [3,7] 
+    ]
+    
+    for edge in edges:
+        p1, p2 = corners[edge[0]], corners[edge[1]]
+        ax.plot3D([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], color='cyan', linewidth=2)
+        
+    ax.set_title("Domain Geometry", color='white')
+    
+    ax.set_xlim([-0.1 * Lx, 1.1 * Lx if Lx > 0 else 1.0])
+    ax.set_ylim([-0.1 * Ly, 1.1 * Ly if Ly > 0 else 1.0])
+    ax.set_zlim([-0.1 * Lz, 1.1 * Lz if Lz > 0 else 1.0])
+    
+    return None

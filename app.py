@@ -56,6 +56,15 @@ class Laplace3DApp(tk.Tk):
         tk.Label(left_panel, text="", bg="#2B2B2B").pack(pady=5)
         
         self.inputs['dx'] = add_input("Grid dx:", 0.05)
+        
+        tk.Label(left_panel, text="", bg="#2B2B2B").pack(pady=2)
+        
+        self.inputs['Lx'] = add_input("Length X (Lx):", 1.0)
+        self.inputs['Ly'] = add_input("Length Y (Ly):", 1.0)
+        self.inputs['Lz'] = add_input("Length Z (Lz):", 1.0)
+        
+        tk.Label(left_panel, text="", bg="#2B2B2B").pack(pady=2)
+        
         self.inputs['omega'] = add_input("Omega:", 1.8)
         self.inputs['tol'] = add_input("Tolerance:", 1e-6)
         self.inputs['maxIter'] = add_input("Max Iter:", 2000)
@@ -71,8 +80,8 @@ class Laplace3DApp(tk.Tk):
         top_center.pack(fill=tk.X, pady=5)
         
         tk.Label(top_center, text="Visual Type:", bg="#1E1E1E", fg="white").pack(side=tk.LEFT, padx=5)
-        self.vis_type = tk.StringVar(value="Heatmap 2D")
-        vis_cb = ttk.Combobox(top_center, textvariable=self.vis_type, values=["Heatmap 2D", "Contour 2D", "Surface 2D", "Scatter 3D", "Isosurface"], state="readonly")
+        self.vis_type = tk.StringVar(value="Domain Geometry")
+        vis_cb = ttk.Combobox(top_center, textvariable=self.vis_type, values=["Domain Geometry", "Heatmap 2D", "Contour 2D", "Surface 2D", "Scatter 3D", "Isosurface"], state="readonly")
         vis_cb.pack(side=tk.LEFT, padx=5)
         vis_cb.bind("<<ComboboxSelected>>", lambda e: self.render_visualization())
         
@@ -102,6 +111,9 @@ class Laplace3DApp(tk.Tk):
         try:
             BC = {k: float(self.inputs[k].get()) for k in ['left', 'right', 'front', 'back', 'bottom', 'top']}
             dx = float(self.inputs['dx'].get())
+            Lx = float(self.inputs['Lx'].get())
+            Ly = float(self.inputs['Ly'].get())
+            Lz = float(self.inputs['Lz'].get())
             omega = float(self.inputs['omega'].get())
             tol = float(self.inputs['tol'].get())
             max_iter = int(self.inputs['maxIter'].get())
@@ -110,7 +122,7 @@ class Laplace3DApp(tk.Tk):
             self.update()
             
             t0 = time.time()
-            solver = Solver3D(1.0, 1.0, 1.0, dx, BC, omega, tol, max_iter)
+            solver = Solver3D(Lx, Ly, Lz, dx, BC, omega, tol, max_iter)
             solver.solve()
             elapsed = time.time() - t0
             
@@ -141,7 +153,7 @@ class Laplace3DApp(tk.Tk):
         self.fig.clf()
         v_type = self.vis_type.get()
         
-        if "3D" in v_type or "Iso" in v_type or "Surface" in v_type:
+        if "3D" in v_type or "Iso" in v_type or "Surface" in v_type or "Geometry" in v_type:
             self.ax = self.fig.add_subplot(111, projection='3d')
         else:
             self.ax = self.fig.add_subplot(111)
@@ -160,7 +172,9 @@ class Laplace3DApp(tk.Tk):
         Y2D = Y[:, :, curr_z]
         T2D = T[:, :, curr_z]
         
-        if v_type == "Heatmap 2D":
+        if v_type == "Domain Geometry":
+            plotter.plot_domain_geometry(self.ax, self.solver_res.Lx, self.solver_res.Ly, self.solver_res.Lz)
+        elif v_type == "Heatmap 2D":
             plotter.plot_heatmap(self.ax, X2D, Y2D, T2D)
         elif v_type == "Contour 2D":
             plotter.plot_contour(self.ax, X2D, Y2D, T2D)
