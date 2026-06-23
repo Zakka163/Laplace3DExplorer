@@ -33,17 +33,15 @@ class Laplace3DApp(tk.Tk):
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # LEFT PANEL
-        left_panel = ttk.Frame(main_frame, width=280)
+        left_panel = tk.LabelFrame(main_frame, text="Control Panel", bg="#2B2B2B", fg="white", font=('Arial', 12, 'bold'), padx=10, pady=10)
         left_panel.pack(side=tk.LEFT, fill=tk.Y, padx=5)
-        
-        ttk.Label(left_panel, text="Control Panel", font=('Arial', 14, 'bold')).pack(pady=10)
         
         self.inputs = {}
         def add_input(label_text, default_val):
-            f = ttk.Frame(left_panel)
-            f.pack(fill=tk.X, pady=2)
-            ttk.Label(f, text=label_text, width=15).pack(side=tk.LEFT)
-            e = ttk.Entry(f, width=10)
+            f = tk.Frame(left_panel, bg="#2B2B2B")
+            f.pack(fill=tk.X, pady=3)
+            tk.Label(f, text=label_text, width=15, bg="#2B2B2B", fg="white", anchor="w").pack(side=tk.LEFT)
+            e = tk.Entry(f, width=10, bg="#404040", fg="white", insertbackground="white", relief="flat")
             e.insert(0, str(default_val))
             e.pack(side=tk.RIGHT)
             return e
@@ -55,31 +53,31 @@ class Laplace3DApp(tk.Tk):
         self.inputs['bottom'] = add_input("BC Bottom:", 75)
         self.inputs['top'] = add_input("BC Top:", 25)
         
-        ttk.Label(left_panel, text="").pack()
+        tk.Label(left_panel, text="", bg="#2B2B2B").pack(pady=5)
         
         self.inputs['dx'] = add_input("Grid dx:", 0.05)
         self.inputs['omega'] = add_input("Omega:", 1.8)
         self.inputs['tol'] = add_input("Tolerance:", 1e-6)
         self.inputs['maxIter'] = add_input("Max Iter:", 2000)
         
-        solve_btn = ttk.Button(left_panel, text="SOLVE", command=self.solve_system)
-        solve_btn.pack(fill=tk.X, pady=20)
+        solve_btn = tk.Button(left_panel, text="SOLVE", bg="#006400", fg="white", font=('Arial', 10, 'bold'), relief="flat", command=self.solve_system)
+        solve_btn.pack(fill=tk.X, pady=25)
         
         # CENTER PANEL
-        center_panel = ttk.Frame(main_frame)
-        center_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
+        center_panel = tk.Frame(main_frame, bg="#1E1E1E")
+        center_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
         
-        top_center = ttk.Frame(center_panel)
+        top_center = tk.Frame(center_panel, bg="#1E1E1E")
         top_center.pack(fill=tk.X, pady=5)
         
-        ttk.Label(top_center, text="Visual Type:").pack(side=tk.LEFT, padx=5)
+        tk.Label(top_center, text="Visual Type:", bg="#1E1E1E", fg="white").pack(side=tk.LEFT, padx=5)
         self.vis_type = tk.StringVar(value="Heatmap 2D")
-        vis_cb = ttk.Combobox(top_center, textvariable=self.vis_type, values=["Heatmap 2D", "Contour 2D", "Surface 2D", "Scatter 3D", "Isosurface"])
+        vis_cb = ttk.Combobox(top_center, textvariable=self.vis_type, values=["Heatmap 2D", "Contour 2D", "Surface 2D", "Scatter 3D", "Isosurface"], state="readonly")
         vis_cb.pack(side=tk.LEFT, padx=5)
         vis_cb.bind("<<ComboboxSelected>>", lambda e: self.render_visualization())
         
-        ttk.Label(top_center, text="Z Layer:").pack(side=tk.LEFT, padx=10)
-        self.z_slider = ttk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, command=lambda v: self.render_visualization())
+        tk.Label(top_center, text="Z Layer:", bg="#1E1E1E", fg="white").pack(side=tk.LEFT, padx=15)
+        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg="#1E1E1E", fg="white", highlightthickness=0, command=lambda v: self.render_visualization())
         self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         
         self.fig = Figure(figsize=(6, 5), dpi=100)
@@ -90,17 +88,15 @@ class Laplace3DApp(tk.Tk):
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         
         # RIGHT PANEL
-        right_panel = ttk.Frame(main_frame, width=250)
+        right_panel = tk.LabelFrame(main_frame, text="Dashboard & Export", bg="#2B2B2B", fg="white", font=('Arial', 12, 'bold'), padx=10, pady=10)
         right_panel.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
-        
-        ttk.Label(right_panel, text="Dashboard", font=('Arial', 14, 'bold')).pack(pady=10)
         
         self.labels = {}
         for lbl in ["Time", "Iter", "Error", "Max Temp", "Min Temp", "Center Temp"]:
-            self.labels[lbl] = ttk.Label(right_panel, text=f"{lbl}: -")
-            self.labels[lbl].pack(anchor=tk.W, pady=5)
+            self.labels[lbl] = tk.Label(right_panel, text=f"{lbl}: -", bg="#2B2B2B", fg="white", anchor="w", font=('Consolas', 10))
+            self.labels[lbl].pack(fill=tk.X, pady=8)
             
-        ttk.Button(right_panel, text="Export CSV", command=self.export_csv).pack(fill=tk.X, side=tk.BOTTOM, pady=5)
+        tk.Button(right_panel, text="Export CSV", bg="#333333", fg="white", relief="flat", command=self.export_csv).pack(fill=tk.X, side=tk.BOTTOM, pady=5)
         
     def solve_system(self):
         try:
@@ -152,11 +148,6 @@ class Laplace3DApp(tk.Tk):
             
         self.ax.set_facecolor('#1E1E1E')
         self.ax.tick_params(colors='white')
-        
-        self.ax.set_xlabel('X Axis', color='white')
-        self.ax.set_ylabel('Y Axis', color='white')
-        if hasattr(self.ax, 'set_zlabel'):
-            self.ax.set_zlabel('Z Axis', color='white')
             
         curr_z = int(float(self.z_slider.get()))
         
@@ -180,6 +171,12 @@ class Laplace3DApp(tk.Tk):
         elif v_type == "Isosurface":
             plotter.plot_isosurface(self.ax, X, Y, Z, T)
             
+        self.ax.set_xlabel('X Axis', color='white', fontsize=10)
+        self.ax.set_ylabel('Y Axis', color='white', fontsize=10)
+        if hasattr(self.ax, 'set_zlabel'):
+            self.ax.set_zlabel('Z Axis', color='white', fontsize=10)
+            
+        self.fig.tight_layout()
         self.canvas.draw()
         
     def export_csv(self):
