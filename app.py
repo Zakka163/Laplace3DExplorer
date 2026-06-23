@@ -23,6 +23,7 @@ class Laplace3DApp(tk.Tk):
         self.resizable(True, True)
         
         self.solver_res = None
+        self.coord_sys = "Cartesian"
         self.Lx = 1.0
         self.Ly = 1.0
         self.Lz = 1.0
@@ -32,10 +33,11 @@ class Laplace3DApp(tk.Tk):
         self.loading_frame = tk.Frame(self, bg="#1E1E1E")
         tk.Label(self.loading_frame, text="Loading Physics Engine & 3D Visualizer...\nPlease wait...", bg="#1E1E1E", fg="white", font=('Arial', 18, 'italic'), justify=tk.CENTER).pack(pady=50)
 
-    def on_setup_submit(self, Lx, Ly, Lz):
-        self.Lx = Lx
-        self.Ly = Ly
-        self.Lz = Lz
+    def on_setup_submit(self, coord_sys, val1, val2, val3):
+        self.coord_sys = coord_sys
+        self.Lx = val1
+        self.Ly = val2
+        self.Lz = val3
         
         self.loading_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         self.update()
@@ -88,7 +90,7 @@ class Laplace3DApp(tk.Tk):
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # 1. Left Panel (Control Panel)
-        self.control_panel = ControlPanel(main_frame, self.solve_system, self.on_aspect_ratio_toggle)
+        self.control_panel = ControlPanel(main_frame, self.solve_system, self.on_aspect_ratio_toggle, self.coord_sys)
         self.control_panel.pack(side=tk.LEFT, fill=tk.Y, padx=5)
         
         # 2. Center Panel (Visualization)
@@ -131,7 +133,7 @@ class Laplace3DApp(tk.Tk):
     def _execute_solve_thread(self, BC, dx, omega, tol, max_iter):
         try:
             t0 = time.time()
-            solver = Solver3D(self.Lx, self.Ly, self.Lz, dx, BC, omega, tol, max_iter)
+            solver = Solver3D(self.coord_sys, self.Lx, self.Ly, self.Lz, dx, BC, omega, tol, max_iter)
             solver.solve()
             elapsed = time.time() - t0
             

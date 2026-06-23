@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 
 class SetupDialog:
     def __init__(self, parent, on_submit_callback):
@@ -7,34 +7,103 @@ class SetupDialog:
         self.on_submit_callback = on_submit_callback
         self.setup_inputs = {}
         
-        self.setup_frame = tk.Frame(parent, bg="#1E1E1E")
+        # Configure styles
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure('Setup.TFrame', background='#1E1E1E')
+        style.configure('Setup.TLabel', background='#1E1E1E', foreground='white', font=('Segoe UI', 12))
+        style.configure('Title.TLabel', background='#1E1E1E', foreground='#00A8FF', font=('Segoe UI', 24, 'bold'))
+        style.configure('Setup.TCombobox', fieldbackground='#333333', background='#444444', foreground='white', font=('Segoe UI', 12))
+        
+        self.setup_frame = ttk.Frame(parent, style='Setup.TFrame')
         self.setup_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
-        tk.Label(self.setup_frame, text="Define Domain Size", bg="#1E1E1E", fg="white", font=('Arial', 24, 'bold')).pack(pady=25)
+        # Add a subtle border/panel effect using a canvas
+        canvas = tk.Canvas(self.setup_frame, bg="#252526", highlightthickness=1, highlightbackground="#3E3E42")
+        canvas.pack(fill=tk.BOTH, expand=True, ipadx=40, ipady=40)
         
-        inputs_frame = tk.Frame(self.setup_frame, bg="#1E1E1E")
-        inputs_frame.pack(pady=10)
+        inner_frame = tk.Frame(canvas, bg="#252526")
+        inner_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
-        for lbl, key in [("Length X (Lx):", "Lx"), ("Length Y (Ly):", "Ly"), ("Length Z (Lz):", "Lz")]:
-            f = tk.Frame(inputs_frame, bg="#1E1E1E")
-            f.pack(fill=tk.X, pady=10)
-            tk.Label(f, text=lbl, bg="#1E1E1E", fg="white", width=15, anchor="w", font=('Arial', 14)).pack(side=tk.LEFT)
-            e = tk.Entry(f, width=15, bg="#404040", fg="white", insertbackground="white", relief="flat", font=('Arial', 14))
-            e.insert(0, "1.0")
-            e.pack(side=tk.RIGHT, padx=10)
-            self.setup_inputs[key] = e
+        ttk.Label(inner_frame, text="Laplace 3D Explorer", style='Title.TLabel', background='#252526').pack(pady=(0, 5))
+        ttk.Label(inner_frame, text="Define Coordinate System & Domain Size", style='Setup.TLabel', background='#252526', font=('Segoe UI', 11, 'italic'), foreground='#AAAAAA').pack(pady=(0, 25))
+        
+        # Coordinate System Selection
+        coord_frame = tk.Frame(inner_frame, bg="#252526")
+        coord_frame.pack(fill=tk.X, pady=15)
+        ttk.Label(coord_frame, text="Coordinate System:", style='Setup.TLabel', background='#252526', width=18, anchor="w").pack(side=tk.LEFT)
+        
+        self.coord_var = tk.StringVar(value="Cartesian")
+        self.coord_cb = ttk.Combobox(coord_frame, textvariable=self.coord_var, values=["Cartesian", "Cylindrical", "Spherical"], state="readonly", style='Setup.TCombobox', width=13, font=('Segoe UI', 12))
+        self.coord_cb.pack(side=tk.RIGHT)
+        self.coord_cb.bind("<<ComboboxSelected>>", self.on_coord_change)
+        
+        # Dynamic Inputs Frame
+        self.inputs_frame = tk.Frame(inner_frame, bg="#252526")
+        self.inputs_frame.pack(fill=tk.X, pady=10)
+        
+        self.labels = ["Length X (Lx):", "Length Y (Ly):", "Length Z (Lz):"]
+        self.keys = ["dim1", "dim2", "dim3"]
+        self.defaults = ["1.0", "1.0", "1.0"]
+        self.input_widgets = []
+        
+        self.build_inputs()
+        
+        # Custom Modern Button
+        btn_frame = tk.Frame(inner_frame, bg="#252526")
+        btn_frame.pack(pady=30)
+        
+        self.submit_btn = tk.Button(btn_frame, text="Initialize Environment", bg="#007ACC", fg="white", font=('Segoe UI', 14, 'bold'), relief="flat", activebackground="#0098FF", activeforeground="white", cursor="hand2", command=self.on_submit, padx=30, pady=12)
+        self.submit_btn.pack()
+        
+        # Hover effects for button
+        self.submit_btn.bind("<Enter>", lambda e: self.submit_btn.config(bg="#0098FF"))
+        self.submit_btn.bind("<Leave>", lambda e: self.submit_btn.config(bg="#007ACC"))
+        
+        self.on_coord_change()
+
+    def build_inputs(self):
+        for widget in self.inputs_frame.winfo_children():
+            widget.destroy()
+        
+        self.input_widgets.clear()
+        
+        for lbl, key, default_val in zip(self.labels, self.keys, self.defaults):
+            f = tk.Frame(self.inputs_frame, bg="#252526")
+            f.pack(fill=tk.X, pady=8)
+            ttk.Label(f, text=lbl, style='Setup.TLabel', background='#252526', width=22, anchor="w").pack(side=tk.LEFT)
+            e = tk.Entry(f, width=12, bg="#333333", fg="white", insertbackground="white", relief="flat", font=('Segoe UI', 14), justify="center")
+            e.insert(0, default_val)
+            e.pack(side=tk.RIGHT)
+            self.input_widgets.append(e)
+
+    def on_coord_change(self, event=None):
+        coord = self.coord_var.get()
+        if coord == "Cartesian":
+            self.labels = ["Length X (Lx):", "Length Y (Ly):", "Length Z (Lz):"]
+            self.defaults = ["1.0", "1.0", "1.0"]
+        elif coord == "Cylindrical":
+            self.labels = ["Radius (R):", "Angle Theta (\u0398) [rad]:", "Height (Lz):"]
+            self.defaults = ["1.0", "6.283185", "1.0"]  # 2*pi approx
+        elif coord == "Spherical":
+            self.labels = ["Radius (R):", "Polar Angle (\u0398) [rad]:", "Azimuthal (\u03A6) [rad]:"]
+            self.defaults = ["1.0", "3.14159", "6.283185"]  # pi, 2*pi
             
-        tk.Button(self.setup_frame, text="Create Environment", bg="#006400", fg="white", font=('Arial', 14, 'bold'), relief="flat", command=self.on_submit, padx=20, pady=10).pack(pady=40)
-        
+        self.build_inputs()
+
     def on_submit(self):
         try:
-            Lx = float(self.setup_inputs["Lx"].get())
-            Ly = float(self.setup_inputs["Ly"].get())
-            Lz = float(self.setup_inputs["Lz"].get())
-            if Lx <= 0 or Ly <= 0 or Lz <= 0:
+            val1 = float(self.input_widgets[0].get())
+            val2 = float(self.input_widgets[1].get())
+            val3 = float(self.input_widgets[2].get())
+            
+            if val1 <= 0 or val2 <= 0 or val3 <= 0:
                 raise ValueError("Dimensions must be positive!")
                 
+            coord = self.coord_var.get()
             self.setup_frame.place_forget()
-            self.on_submit_callback(Lx, Ly, Lz)
+            
+            # Pass coord system along with dimensions
+            self.on_submit_callback(coord, val1, val2, val3)
         except ValueError:
             messagebox.showerror("Error", "Invalid dimensions! Please enter positive numbers.")

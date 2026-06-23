@@ -1,10 +1,11 @@
 import tkinter as tk
 
 class ControlPanel(tk.LabelFrame):
-    def __init__(self, parent, solve_callback, aspect_ratio_callback):
+    def __init__(self, parent, solve_callback, aspect_ratio_callback, coord_sys="Cartesian"):
         super().__init__(parent, text="Control Panel", bg="#2B2B2B", fg="white", font=('Arial', 12, 'bold'), padx=10, pady=10)
         self.solve_callback = solve_callback
         self.aspect_ratio_callback = aspect_ratio_callback
+        self.coord_sys = coord_sys
         self.inputs = {}
         self.build_ui()
         
@@ -18,12 +19,19 @@ class ControlPanel(tk.LabelFrame):
             e.pack(side=tk.RIGHT)
             return e
             
-        self.inputs['left'] = add_input("BC Left:", 100)
-        self.inputs['right'] = add_input("BC Right:", 50)
-        self.inputs['front'] = add_input("BC Front:", 0)
-        self.inputs['back'] = add_input("BC Back:", 100)
-        self.inputs['bottom'] = add_input("BC Bottom:", 75)
-        self.inputs['top'] = add_input("BC Top:", 25)
+        if self.coord_sys == "Cartesian":
+            labels = ["BC Left (x=0):", "BC Right (x=Lx):", "BC Front (y=0):", "BC Back (y=Ly):", "BC Bottom (z=0):", "BC Top (z=Lz):"]
+        elif self.coord_sys == "Cylindrical":
+            labels = ["Inner R (r=\u0394r):", "Outer R (r=R):", "Start \u0398 (\u03B8=0):", "End \u0398 (\u03B8=\u0398):", "Bottom (z=0):", "Top (z=Lz):"]
+        else: # Spherical
+            labels = ["Inner R (r=\u0394r):", "Outer R (r=R):", "Start \u0398 (\u03B8=0):", "End \u0398 (\u03B8=\u0398):", "Start \u03A6 (\u03C6=0):", "End \u03A6 (\u03C6=\u03A6):"]
+
+        self.inputs['left'] = add_input(labels[0], 100)
+        self.inputs['right'] = add_input(labels[1], 50)
+        self.inputs['front'] = add_input(labels[2], 0)
+        self.inputs['back'] = add_input(labels[3], 100)
+        self.inputs['bottom'] = add_input(labels[4], 75)
+        self.inputs['top'] = add_input(labels[5], 25)
         
         tk.Label(self, text="", bg="#2B2B2B").pack(pady=5)
         

@@ -101,6 +101,28 @@ class VisualizationPanel(tk.Frame):
             
         self.canvas.draw_idle()
 
+    def get_physical_coordinates(self):
+        if not hasattr(self.app, 'solver_res') or self.app.solver_res is None:
+            return None, None, None
+            
+        X = self.app.solver_res.X
+        Y = self.app.solver_res.Y
+        Z = self.app.solver_res.Z
+        
+        if self.app.coord_sys == "Cylindrical":
+            R, Theta = X, Y
+            X_phys = R * np.cos(Theta)
+            Y_phys = R * np.sin(Theta)
+            return X_phys, Y_phys, Z
+        elif self.app.coord_sys == "Spherical":
+            R, Theta, Phi = X, Y, Z
+            X_phys = R * np.sin(Theta) * np.cos(Phi)
+            Y_phys = R * np.sin(Theta) * np.sin(Phi)
+            Z_phys = R * np.cos(Theta)
+            return X_phys, Y_phys, Z_phys
+            
+        return X, Y, Z
+
     def render_visualization(self, event=None):
         if self._is_rendering:
             return
@@ -139,7 +161,8 @@ class VisualizationPanel(tk.Frame):
             self.ax.tick_params(colors='white')
                 
             if v_type == "Domain Geometry":
-                plotter.plot_domain_geometry(self.ax, self.app.Lx, self.app.Ly, self.app.Lz)
+                X_phys, Y_phys, Z_phys = self.get_physical_coordinates()
+                plotter.plot_domain_geometry(self.ax, X_phys, Y_phys, Z_phys)
                 self.ax.set_xlabel('X')
                 self.ax.set_ylabel('Y')
                 self.ax.set_zlabel('Z')
@@ -149,9 +172,7 @@ class VisualizationPanel(tk.Frame):
             curr_z = self.z_var.get()
             
             T = self.app.solver_res.T
-            X = self.app.solver_res.X
-            Y = self.app.solver_res.Y
-            Z = self.app.solver_res.Z
+            X, Y, Z = self.get_physical_coordinates()
             
             if curr_z >= Z.shape[2]:
                 curr_z = Z.shape[2] - 1
