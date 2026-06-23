@@ -57,7 +57,9 @@ class Laplace3DApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.withdraw()
+        self.after(10, self.show_startup)
         
+    def show_startup(self):
         dialog = StartupDialog(self)
         if not dialog.result:
             self.destroy()
