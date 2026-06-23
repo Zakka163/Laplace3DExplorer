@@ -51,6 +51,10 @@ class Laplace3DApp(tk.Tk):
         self.menu_bar.add_cascade(label="Export", menu=self.export_menu)
         self.export_menu.add_command(label="Export 3D Grid Data (CSV)", command=self.export_csv, state=tk.DISABLED)
         
+        self.settings_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="Settings", menu=self.settings_menu)
+        self.settings_menu.add_command(label="Change Environment...", command=self.open_setup_dialog)
+        
         self.solver_res = None
         self.coord_sys = "Cartesian"
         self.Lx = 1.0
@@ -68,17 +72,23 @@ class Laplace3DApp(tk.Tk):
         self.Ly = val2
         self.Lz = val3
         
-        # Ensure loading frame honors current theme
-        self.configure(bg=Theme.BG_ROOT)
-        self.loading_frame.configure(bg=Theme.BG_ROOT)
-        for child in self.loading_frame.winfo_children():
-            child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
-        
-        self.loading_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
-        self.update()
-        
-        # Delay heavy load slightly so UI can update the loading text
-        self.after(50, self.load_heavy_libraries)
+        if np is not None:
+            # Libraries are already loaded, just build UI instantly
+            self.build_ui()
+            self.visualization_panel.render_visualization()
+            self.export_menu.entryconfig(0, state=tk.DISABLED)
+        else:
+            # Ensure loading frame honors current theme
+            self.configure(bg=Theme.BG_ROOT)
+            self.loading_frame.configure(bg=Theme.BG_ROOT)
+            for child in self.loading_frame.winfo_children():
+                child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
+            
+            self.loading_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+            self.update()
+            
+            # Delay heavy load slightly so UI can update the loading text
+            self.after(50, self.load_heavy_libraries)
         
     def load_heavy_libraries(self):
         print("[INFO] Loading Machine Learning & Physics Libraries...")
@@ -114,6 +124,14 @@ class Laplace3DApp(tk.Tk):
         self.visualization_panel.render_visualization()
         
     def build_ui(self):
+        # Destroy existing widgets to prevent duplicates and memory leaks
+        if hasattr(self, 'control_panel') and self.control_panel is not None:
+            self.control_panel.destroy()
+            self.control_panel = None
+        if hasattr(self, 'v_paned') and self.v_paned is not None:
+            self.v_paned.destroy()
+            self.v_paned = None
+            
         # Configure global styles for ttk
         style = ttk.Style(self)
         style.theme_use('clam')
@@ -197,6 +215,25 @@ class Laplace3DApp(tk.Tk):
     def on_transparency_toggle(self):
         if hasattr(self, 'visualization_panel'):
             self.visualization_panel.render_visualization()
+            
+    def open_setup_dialog(self):
+        # Hide main UI frames
+        if hasattr(self, 'control_panel') and self.control_panel is not None:
+            self.control_panel.pack_forget()
+        if hasattr(self, 'v_paned') and self.v_paned is not None:
+            self.v_paned.pack_forget()
+            
+        # Clear solver result
+        self.solver_res = None
+        
+        # Show setup frame again
+        self.setup_dialog.show()
+        
+    def restore_main_ui(self):
+        if hasattr(self, 'control_panel') and self.control_panel is not None:
+            self.control_panel.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5, before=self.v_paned)
+        if hasattr(self, 'v_paned') and self.v_paned is not None:
+            self.v_paned.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
     def solve_system(self):
         try:

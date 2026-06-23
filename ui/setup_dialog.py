@@ -17,7 +17,6 @@ class SetupDialog:
         style.configure('Setup.TCombobox', fieldbackground=Theme.BG_INPUT, background=Theme.BORDER, foreground=Theme.FG_MAIN, font=Theme.FONT_REGULAR)
         
         self.setup_frame = tk.Frame(parent, bg=Theme.BG_PANEL, highlightthickness=1, highlightbackground=Theme.BORDER, padx=40, pady=40)
-        self.setup_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
         inner_frame = tk.Frame(self.setup_frame, bg=Theme.BG_PANEL)
         inner_frame.pack(fill=tk.BOTH, expand=True)
@@ -46,18 +45,24 @@ class SetupDialog:
         
         self.build_inputs()
         
-        # Custom Modern Button
-        btn_frame = tk.Frame(inner_frame, bg=Theme.BG_PANEL)
-        btn_frame.pack(pady=30)
+        # Custom Modern Buttons
+        self.btn_frame = tk.Frame(inner_frame, bg=Theme.BG_PANEL)
+        self.btn_frame.pack(pady=30)
         
-        self.submit_btn = tk.Button(btn_frame, text="Initialize Environment", bg=Theme.ACCENT, fg=Theme.FG_MAIN, font=Theme.FONT_BOLD, relief="flat", activebackground=Theme.ACCENT_HOVER, activeforeground=Theme.FG_MAIN, cursor="hand2", command=self.on_submit, padx=30, pady=12)
-        self.submit_btn.pack()
+        self.submit_btn = tk.Button(self.btn_frame, text="Initialize Environment", bg=Theme.ACCENT, fg=Theme.FG_MAIN, font=Theme.FONT_BOLD, relief="flat", activebackground=Theme.ACCENT_HOVER, activeforeground=Theme.FG_MAIN, cursor="hand2", command=self.on_submit, padx=20, pady=10)
         
-        # Hover effects for button
+        self.cancel_btn = tk.Button(self.btn_frame, text="Cancel", bg=Theme.BORDER, fg=Theme.FG_MAIN, font=Theme.FONT_BOLD, relief="flat", activebackground=Theme.BORDER, activeforeground=Theme.FG_MAIN, cursor="hand2", command=self.on_cancel, padx=20, pady=10)
+        
+        # Hover effects for submit button
         self.submit_btn.bind("<Enter>", lambda e: self.submit_btn.config(bg=Theme.ACCENT_HOVER))
         self.submit_btn.bind("<Leave>", lambda e: self.submit_btn.config(bg=Theme.ACCENT))
         
+        # Hover effects for cancel button
+        self.cancel_btn.bind("<Enter>", lambda e: self.cancel_btn.config(bg=Theme.FG_SUB))
+        self.cancel_btn.bind("<Leave>", lambda e: self.cancel_btn.config(bg=Theme.BORDER))
+        
         self.on_coord_change()
+        self.show()
 
     def build_inputs(self):
         for widget in self.inputs_frame.winfo_children():
@@ -87,6 +92,27 @@ class SetupDialog:
             self.defaults = ["1.0", "3.14159", "6.283185"]  # pi, 2*pi
             
         self.build_inputs()
+
+    def show(self):
+        # Determine whether to show Cancel button based on session state
+        has_active_session = hasattr(self.parent, 'control_panel') and self.parent.control_panel is not None
+        
+        self.submit_btn.pack_forget()
+        self.cancel_btn.pack_forget()
+        
+        if has_active_session:
+            self.cancel_btn.pack(side=tk.LEFT, padx=10)
+            self.submit_btn.pack(side=tk.LEFT, padx=10)
+        else:
+            self.submit_btn.pack(side=tk.TOP, padx=10)
+            
+        self.setup_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.setup_frame.lift() # Bring to front
+
+    def on_cancel(self):
+        self.setup_frame.place_forget()
+        if hasattr(self.parent, 'restore_main_ui'):
+            self.parent.restore_main_ui()
 
     def on_submit(self):
         try:
