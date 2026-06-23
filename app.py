@@ -32,8 +32,14 @@ class Laplace3DApp(tk.Tk):
         
         self.show_sidebar = tk.BooleanVar(value=True)
         self.show_terminal = tk.BooleanVar(value=False)
+        self.transparent_3d = tk.BooleanVar(value=False)
+        self.equal_aspect = tk.BooleanVar(value=False)
+        
         view_menu.add_checkbutton(label="Toggle Sidebar", variable=self.show_sidebar, command=self.toggle_panels)
         view_menu.add_checkbutton(label="Toggle Terminal", variable=self.show_terminal, command=self.toggle_panels)
+        view_menu.add_separator()
+        view_menu.add_checkbutton(label="Transparent 3D Solids", variable=self.transparent_3d, command=self.on_transparency_toggle)
+        view_menu.add_checkbutton(label="Equal Aspect Ratio (True Scale)", variable=self.equal_aspect, command=self.on_aspect_ratio_toggle)
         view_menu.add_separator()
         
         theme_menu = tk.Menu(view_menu, tearoff=0)
@@ -190,6 +196,10 @@ class Laplace3DApp(tk.Tk):
     def on_aspect_ratio_toggle(self):
         if hasattr(self, 'visualization_panel'):
             self.visualization_panel.update_aspect_ratio()
+            
+    def on_transparency_toggle(self):
+        if hasattr(self, 'visualization_panel'):
+            self.visualization_panel.render_visualization()
 
     def solve_system(self):
         try:

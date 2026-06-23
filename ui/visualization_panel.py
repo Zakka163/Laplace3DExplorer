@@ -211,9 +211,11 @@ class VisualizationPanel(tk.Frame):
             self.ax.set_facecolor(Theme.BG_ROOT)
             self.ax.tick_params(colors=Theme.FG_MAIN)
                 
+            alpha_val = 0.3 if (hasattr(self.app, 'transparent_3d') and self.app.transparent_3d.get()) else 1.0
+            
             if v_type == "Domain Geometry":
                 X_phys, Y_phys, Z_phys = self.get_physical_coordinates()
-                plotter.plot_domain_geometry(self.ax, X_phys, Y_phys, Z_phys)
+                plotter.plot_domain_geometry(self.ax, X_phys, Y_phys, Z_phys, alpha=alpha_val)
                 coord_sys = self.app.coord_sys if hasattr(self.app, 'coord_sys') else "Cartesian"
                 if coord_sys == "Cylindrical":
                     xl, yl, zl = 'X (R cos \u03B8)', 'Y (R sin \u03B8)', 'Z'
@@ -264,13 +266,13 @@ class VisualizationPanel(tk.Frame):
                 if not self.cb: self.cb = self.fig.colorbar(self.cax, ax=self.ax)
                 else: self.cb.update_normal(self.cax)
             elif v_type == "Scatter 3D":
-                self.cax = plotter.plot_scatter3d(self.ax, X, Y, Z, T)
+                self.cax = plotter.plot_scatter3d(self.ax, X, Y, Z, T, alpha=alpha_val)
                 if not self.cb: self.cb = self.fig.colorbar(self.cax, ax=self.ax)
                 else: self.cb.update_normal(self.cax)
             elif v_type == "Isosurface":
-                plotter.plot_isosurface(self.ax, X, Y, Z, T)
+                plotter.plot_isosurface(self.ax, X, Y, Z, T, alpha=alpha_val)
             elif v_type == "Cutaway 3D":
-                self.cax = plotter.plot_cutaway3d(self.ax, X, Y, Z, T, curr_z, self.app.solver_res.Lx, self.app.solver_res.Ly, self.app.solver_res.Lz)
+                self.cax = plotter.plot_cutaway3d(self.ax, X, Y, Z, T, curr_z, self.app.solver_res.Lx, self.app.solver_res.Ly, self.app.solver_res.Lz, alpha=alpha_val)
                 if not self.cb: self.cb = self.fig.colorbar(self.cax, ax=self.ax)
                 else: self.cb.update_normal(self.cax)
                 
@@ -296,13 +298,13 @@ class VisualizationPanel(tk.Frame):
             self._is_rendering = False
 
     def update_aspect_ratio(self):
-        if not hasattr(self, 'ax'):
+        if not hasattr(self, 'ax') or not hasattr(self.ax, 'set_box_aspect'):
             return
             
         v_type = self.vis_type.get()
-        if hasattr(self.ax, 'set_box_aspect') and v_type in ["Domain Geometry", "Scatter 3D", "Isosurface", "Cutaway 3D"]:
-            # Need to get equal_aspect_var from app controller's control panel
-            if hasattr(self.app, 'control_panel') and self.app.control_panel.equal_aspect_var.get():
+        if v_type in ["Domain Geometry", "Scatter 3D", "Isosurface", "Cutaway 3D"]:
+            is_equal = hasattr(self.app, 'equal_aspect') and self.app.equal_aspect.get()
+            if is_equal:
                 if v_type == "Domain Geometry":
                     Lx = self.app.solver_res.Lx if self.app.solver_res else self.app.Lx
                     Ly = self.app.solver_res.Ly if self.app.solver_res else self.app.Ly
