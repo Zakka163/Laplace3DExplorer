@@ -122,11 +122,11 @@ class Laplace3DApp(tk.Tk):
         style.configure('TButton', background=Theme.SUCCESS, foreground=Theme.FG_MAIN, font=Theme.FONT_SMALL)
         
         # Main Vertical Splitter (Top: UI, Bottom: Log)
-        self.v_paned = tk.PanedWindow(self, orient=tk.VERTICAL, opaqueresize=False, bg=Theme.BG_ROOT, sashwidth=4)
+        self.v_paned = tk.PanedWindow(self, orient=tk.VERTICAL, opaqueresize=False, bg=Theme.BG_ROOT, sashwidth=4, bd=0, sashrelief=tk.FLAT)
         self.v_paned.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
         # Top Horizontal Splitter (Left: Sidebar, Right: Viz)
-        self.h_paned = tk.PanedWindow(self.v_paned, orient=tk.HORIZONTAL, opaqueresize=False, bg=Theme.BG_ROOT, sashwidth=4)
+        self.h_paned = tk.PanedWindow(self.v_paned, orient=tk.HORIZONTAL, opaqueresize=False, bg=Theme.BG_ROOT, sashwidth=4, bd=0, sashrelief=tk.FLAT)
         self.v_paned.add(self.h_paned, stretch="always")
         
         # --- LEFT SIDEBAR (Control) ---

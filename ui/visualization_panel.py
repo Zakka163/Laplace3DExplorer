@@ -40,8 +40,8 @@ class VisualizationPanel(tk.Frame):
         self.z_spin.bind('<Return>', self.on_spinbox_enter)
         
         # We set resolution=1 explicitly so the slider moves in integer steps (index layers)
-        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, highlightthickness=0, variable=self.z_var, showvalue=False, resolution=1, command=lambda v: self.render_visualization())
-        self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, highlightthickness=0, variable=self.z_var, showvalue=False, resolution=1, length=250, command=lambda v: self.render_visualization())
+        self.z_slider.pack(side=tk.LEFT, padx=5)
         
         self.fig = Figure(figsize=(6, 5), dpi=100)
         self.fig.patch.set_facecolor(Theme.BG_ROOT)
@@ -245,7 +245,7 @@ class VisualizationPanel(tk.Frame):
             physical_z = Z[0, 0, curr_z]
             # Update spinbox and label with physical Z
             self.z_spin_var.set(round(physical_z, 4))
-            self.lbl_z_slider.config(text=f"Z Layer Index: {curr_z}  [Z = {physical_z:.2f}]:")
+            self.lbl_z_slider.config(text=f"Z Layer Index: {curr_z}")
             
             X2D = X[:, :, curr_z]
             Y2D = Y[:, :, curr_z]

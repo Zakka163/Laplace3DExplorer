@@ -3,7 +3,7 @@ from ui.theme import Theme
 
 class ControlPanel(tk.LabelFrame):
     def __init__(self, parent, solve_callback, coord_sys="Cartesian"):
-        super().__init__(parent, text="Control Panel", bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, font=Theme.FONT_BOLD, padx=10, pady=10)
+        super().__init__(parent, text="Control Panel", bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, font=Theme.FONT_BOLD, padx=10, pady=10, relief="flat", bd=0)
         self.solve_callback = solve_callback
         self.coord_sys = coord_sys
         self.inputs = {}
@@ -37,7 +37,7 @@ class ControlPanel(tk.LabelFrame):
         
         self.inputs['dx'] = add_input("Grid Resolution:", 0.05)
         
-        self.solve_btn = tk.Button(self, text="SOLVE", bg=Theme.SUCCESS, fg=Theme.FG_MAIN, font=Theme.FONT_BOLD, relief="flat", command=self.solve_callback)
+        self.solve_btn = tk.Button(self, text="SOLVE", bg=Theme.SUCCESS, fg=Theme.SUCCESS_FG, font=Theme.FONT_BOLD, relief="flat", command=self.solve_callback)
         self.solve_btn.pack(fill=tk.X, pady=25)
         self.solve_btn.bind("<Enter>", lambda e: self.solve_btn.config(bg=Theme.SUCCESS_HOVER))
         self.solve_btn.bind("<Leave>", lambda e: self.solve_btn.config(bg=Theme.SUCCESS))
@@ -57,4 +57,4 @@ class ControlPanel(tk.LabelFrame):
             elif isinstance(widget, tk.Label):
                 widget.configure(bg=Theme.BG_PANEL)
         
-        self.solve_btn.configure(bg=Theme.SUCCESS, fg=Theme.FG_MAIN)
+        self.solve_btn.configure(bg=Theme.SUCCESS, fg=Theme.SUCCESS_FG)
