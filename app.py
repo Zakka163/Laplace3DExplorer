@@ -12,15 +12,73 @@ from matplotlib.figure import Figure
 from core.solver import Solver3D
 from visualization import plotter
 
+class StartupDialog(tk.Toplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("Simulation Setup")
+        self.geometry("350x250")
+        self.configure(bg="#2B2B2B")
+        self.resizable(False, False)
+        
+        self.result = None
+        
+        tk.Label(self, text="Define Domain Size", bg="#2B2B2B", fg="white", font=('Arial', 14, 'bold')).pack(pady=15)
+        
+        frame = tk.Frame(self, bg="#2B2B2B")
+        frame.pack(pady=10)
+        
+        self.inputs = {}
+        for lbl, key in [("Length X (Lx):", "Lx"), ("Length Y (Ly):", "Ly"), ("Length Z (Lz):", "Lz")]:
+            f = tk.Frame(frame, bg="#2B2B2B")
+            f.pack(fill=tk.X, pady=5)
+            tk.Label(f, text=lbl, bg="#2B2B2B", fg="white", width=15, anchor="w").pack(side=tk.LEFT)
+            e = tk.Entry(f, width=10, bg="#404040", fg="white", insertbackground="white", relief="flat")
+            e.insert(0, "1.0")
+            e.pack(side=tk.RIGHT)
+            self.inputs[key] = e
+            
+        tk.Button(self, text="Create Environment", bg="#006400", fg="white", font=('Arial', 10, 'bold'), relief="flat", command=self.on_submit).pack(pady=20)
+        
+        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
+        self.transient(master)
+        self.grab_set()
+        self.wait_window(self)
+        
+    def on_submit(self):
+        try:
+            Lx = float(self.inputs["Lx"].get())
+            Ly = float(self.inputs["Ly"].get())
+            Lz = float(self.inputs["Lz"].get())
+            if Lx <= 0 or Ly <= 0 or Lz <= 0:
+                raise ValueError("Dimensions must be positive!")
+            self.result = (Lx, Ly, Lz)
+            self.destroy()
+        except ValueError:
+            messagebox.showerror("Error", "Invalid dimensions! Please enter positive numbers.")
+            
+    def on_cancel(self):
+        self.result = None
+        self.destroy()
+
 class Laplace3DApp(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.withdraw()
+        
+        dialog = StartupDialog(self)
+        if not dialog.result:
+            self.destroy()
+            return
+            
+        self.Lx, self.Ly, self.Lz = dialog.result
+        
         self.title("Laplace 3D Explorer")
         self.geometry("1200x700")
         self.configure(bg="#1E1E1E")
         
         self.solver_res = None
         self.build_ui()
+        self.deiconify()
         
     def build_ui(self):
         style = ttk.Style(self)
@@ -56,18 +114,6 @@ class Laplace3DApp(tk.Tk):
         tk.Label(left_panel, text="", bg="#2B2B2B").pack(pady=5)
         
         self.inputs['dx'] = add_input("Grid dx:", 0.05)
-        
-        tk.Label(left_panel, text="", bg="#2B2B2B").pack(pady=2)
-        
-        self.inputs['Lx'] = add_input("Length X (Lx):", 1.0)
-        self.inputs['Ly'] = add_input("Length Y (Ly):", 1.0)
-        self.inputs['Lz'] = add_input("Length Z (Lz):", 1.0)
-        
-        tk.Label(left_panel, text="", bg="#2B2B2B").pack(pady=2)
-        
-        self.inputs['omega'] = add_input("Omega:", 1.8)
-        self.inputs['tol'] = add_input("Tolerance:", 1e-6)
-        self.inputs['maxIter'] = add_input("Max Iter:", 2000)
         
         solve_btn = tk.Button(left_panel, text="SOLVE", bg="#006400", fg="white", font=('Arial', 10, 'bold'), relief="flat", command=self.solve_system)
         solve_btn.pack(fill=tk.X, pady=25)
@@ -112,18 +158,17 @@ class Laplace3DApp(tk.Tk):
         try:
             BC = {k: float(self.inputs[k].get()) for k in ['left', 'right', 'front', 'back', 'bottom', 'top']}
             dx = float(self.inputs['dx'].get())
-            Lx = float(self.inputs['Lx'].get())
-            Ly = float(self.inputs['Ly'].get())
-            Lz = float(self.inputs['Lz'].get())
-            omega = float(self.inputs['omega'].get())
-            tol = float(self.inputs['tol'].get())
-            max_iter = int(self.inputs['maxIter'].get())
+            
+            # Internal Advanced Solver Settings
+            omega = 1.8
+            tol = 1e-6
+            max_iter = 2000
             
             self.title("Laplace 3D Explorer - SOLVING...")
             self.update()
             
             t0 = time.time()
-            solver = Solver3D(Lx, Ly, Lz, dx, BC, omega, tol, max_iter)
+            solver = Solver3D(self.Lx, self.Ly, self.Lz, dx, BC, omega, tol, max_iter)
             solver.solve()
             elapsed = time.time() - t0
             
