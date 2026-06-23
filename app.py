@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog, ttk
 import time
 import os
 import threading
@@ -115,7 +115,7 @@ class Laplace3DApp(tk.Tk):
         
     def build_ui(self):
         # Configure global styles for ttk
-        style = tk.ttk.Style(self)
+        style = ttk.Style(self)
         style.theme_use('clam')
         style.configure('TFrame', background=Theme.BG_ROOT)
         style.configure('TLabel', background=Theme.BG_ROOT, foreground=Theme.FG_MAIN)
@@ -207,7 +207,7 @@ class Laplace3DApp(tk.Tk):
             tol = 1e-6
             max_iter = 2000
             
-            print(f"\n[INFO] Starting Simulation Solver...")
+            print("\n[INFO] Starting Simulation Solver...")
             print(f"[INFO] BCs: {BC}")
             print(f"[INFO] Parameters: dx={dx}, omega={omega}, tol={tol}, max_iter={max_iter}")
             
