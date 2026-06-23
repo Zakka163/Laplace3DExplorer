@@ -298,6 +298,17 @@ class Laplace3DApp(tk.Tk):
             Y = self.solver_res.Y
             Z = self.solver_res.Z
             
+            # Clamp curr_z to avoid index out of bounds if user types a random large number
+            if curr_z >= Z.shape[2]:
+                curr_z = Z.shape[2] - 1
+                self.z_var.set(curr_z)
+            elif curr_z < 0:
+                curr_z = 0
+                self.z_var.set(curr_z)
+                
+            physical_z = Z[0, 0, curr_z]
+            self.lbl_z_slider.config(text=f"Z Layer Index [Z = {physical_z:.2f}]:")
+            
             X2D = X[:, :, curr_z]
             Y2D = Y[:, :, curr_z]
             T2D = T[:, :, curr_z]
