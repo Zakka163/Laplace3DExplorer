@@ -2,9 +2,13 @@ import numpy as np
 from skimage import measure
 from ui.theme import Theme
 
+import warnings
+
 def plot_heatmap(ax, X2D, Y2D, T2D):
     ax.clear()
-    img = ax.pcolormesh(X2D, Y2D, T2D, shading='auto', cmap='jet')
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        img = ax.pcolormesh(X2D, Y2D, T2D, shading='nearest', cmap='jet')
     return img
 
 def plot_contour(ax, X2D, Y2D, T2D):
