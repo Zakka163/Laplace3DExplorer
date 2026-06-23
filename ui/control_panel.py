@@ -10,51 +10,69 @@ class ControlPanel(tk.LabelFrame):
         self.build_ui()
         
     def build_ui(self):
-        def add_input(label_text, default_val):
-            f = tk.Frame(self, bg=Theme.BG_PANEL)
-            f.pack(fill=tk.X, pady=3)
+        self.main_frame = tk.Frame(self, bg=Theme.BG_PANEL)
+        self.main_frame.pack(fill=tk.BOTH, expand=True)
+
+        def add_input(parent, label_text, default_val):
+            f = tk.Frame(parent, bg=Theme.BG_PANEL)
+            f.pack(side=tk.TOP, fill=tk.X, pady=2, padx=5)
             tk.Label(f, text=label_text, width=18, bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, font=Theme.FONT_SMALL, anchor="w").pack(side=tk.LEFT)
-            e = tk.Entry(f, width=10, bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, insertbackground=Theme.FG_MAIN, relief="flat", font=Theme.FONT_SMALL)
+            e = tk.Entry(f, width=8, bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, insertbackground=Theme.FG_MAIN, relief="flat", font=Theme.FONT_SMALL)
             e.insert(0, str(default_val))
             e.pack(side=tk.RIGHT)
             return e
             
         if self.coord_sys == "Cartesian":
-            labels = ["BC Left (x=0):", "BC Right (x=Lx):", "BC Front (y=0):", "BC Back (y=Ly):", "BC Bottom (z=0):", "BC Top (z=Lz):"]
+            labels = ["Left (x=0):", "Right (x=Lx):", "Front (y=0):", "Back (y=Ly):", "Bottom (z=0):", "Top (z=Lz):"]
+            title1, title2, title3 = "X Boundaries", "Y Boundaries", "Z Boundaries"
         elif self.coord_sys == "Cylindrical":
             labels = ["Inner R (r=\u0394r):", "Outer R (r=R):", "Start \u0398 (\u03B8=0):", "End \u0398 (\u03B8=\u0398):", "Bottom (z=0):", "Top (z=Lz):"]
+            title1, title2, title3 = "R Boundaries", "\u0398 Boundaries", "Z Boundaries"
         else: # Spherical
             labels = ["Inner R (r=\u0394r):", "Outer R (r=R):", "Start \u0398 (\u03B8=0):", "End \u0398 (\u03B8=\u0398):", "Start \u03A6 (\u03C6=0):", "End \u03A6 (\u03C6=\u03A6):"]
+            title1, title2, title3 = "R Boundaries", "\u0398 Boundaries", "\u03A6 Boundaries"
 
-        self.inputs['left'] = add_input(labels[0], 100)
-        self.inputs['right'] = add_input(labels[1], 50)
-        self.inputs['front'] = add_input(labels[2], 0)
-        self.inputs['back'] = add_input(labels[3], 100)
-        self.inputs['bottom'] = add_input(labels[4], 75)
-        self.inputs['top'] = add_input(labels[5], 25)
+        grp_x = tk.LabelFrame(self.main_frame, text=title1, bg=Theme.BG_PANEL, fg=Theme.FG_SUB, bd=1, relief="ridge")
+        grp_x.pack(side=tk.LEFT, padx=10, pady=0, fill=tk.Y)
+        self.inputs['left'] = add_input(grp_x, labels[0], 100)
+        self.inputs['right'] = add_input(grp_x, labels[1], 50)
         
-        tk.Label(self, text="", bg=Theme.BG_PANEL).pack(pady=5)
+        grp_y = tk.LabelFrame(self.main_frame, text=title2, bg=Theme.BG_PANEL, fg=Theme.FG_SUB, bd=1, relief="ridge")
+        grp_y.pack(side=tk.LEFT, padx=10, pady=0, fill=tk.Y)
+        self.inputs['front'] = add_input(grp_y, labels[2], 0)
+        self.inputs['back'] = add_input(grp_y, labels[3], 100)
         
-        self.inputs['dx'] = add_input("Grid Resolution:", 0.05)
+        grp_z = tk.LabelFrame(self.main_frame, text=title3, bg=Theme.BG_PANEL, fg=Theme.FG_SUB, bd=1, relief="ridge")
+        grp_z.pack(side=tk.LEFT, padx=10, pady=0, fill=tk.Y)
+        self.inputs['bottom'] = add_input(grp_z, labels[4], 75)
+        self.inputs['top'] = add_input(grp_z, labels[5], 25)
         
-        self.solve_btn = tk.Button(self, text="▶  SOLVE", bg=Theme.SUCCESS, fg=Theme.SUCCESS_FG, font=Theme.FONT_BOLD, relief="flat", command=self.solve_callback)
-        self.solve_btn.pack(fill=tk.X, pady=25)
+        grp_sim = tk.LabelFrame(self.main_frame, text="Simulation", bg=Theme.BG_PANEL, fg=Theme.FG_SUB, bd=1, relief="ridge")
+        grp_sim.pack(side=tk.LEFT, padx=10, pady=0, fill=tk.Y)
+        self.inputs['dx'] = add_input(grp_sim, "Grid Res:", 0.05)
+        
+        # Center the solve button inside the simulation group
+        btn_frame = tk.Frame(grp_sim, bg=Theme.BG_PANEL)
+        btn_frame.pack(side=tk.TOP, fill=tk.X, pady=5, padx=5)
+        self.solve_btn = tk.Button(btn_frame, text="▶  SOLVE", bg=Theme.SUCCESS, fg=Theme.SUCCESS_FG, font=Theme.FONT_BOLD, relief="flat", command=self.solve_callback)
+        self.solve_btn.pack(fill=tk.X)
         self.solve_btn.bind("<Enter>", lambda e: self.solve_btn.config(bg=Theme.SUCCESS_HOVER))
         self.solve_btn.bind("<Leave>", lambda e: self.solve_btn.config(bg=Theme.SUCCESS))
-        
-        tk.Label(self, text="", bg=Theme.BG_PANEL).pack(pady=5)
 
     def apply_theme(self):
         self.configure(bg=Theme.BG_PANEL, fg=Theme.FG_MAIN)
-        for widget in self.winfo_children():
-            if isinstance(widget, tk.Frame):
-                widget.configure(bg=Theme.BG_PANEL)
-                for child in widget.winfo_children():
-                    if isinstance(child, tk.Label):
-                        child.configure(bg=Theme.BG_PANEL, fg=Theme.FG_MAIN)
-                    elif isinstance(child, tk.Entry):
-                        child.configure(bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, insertbackground=Theme.FG_MAIN)
-            elif isinstance(widget, tk.Label):
-                widget.configure(bg=Theme.BG_PANEL)
         
+        def update_widgets(parent):
+            for widget in parent.winfo_children():
+                if isinstance(widget, tk.Frame) or isinstance(widget, tk.LabelFrame):
+                    widget.configure(bg=Theme.BG_PANEL)
+                    if isinstance(widget, tk.LabelFrame):
+                        widget.configure(fg=Theme.FG_SUB)
+                    update_widgets(widget)
+                elif isinstance(widget, tk.Label):
+                    widget.configure(bg=Theme.BG_PANEL, fg=Theme.FG_MAIN)
+                elif isinstance(widget, tk.Entry):
+                    widget.configure(bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, insertbackground=Theme.FG_MAIN)
+                    
+        update_widgets(self)
         self.solve_btn.configure(bg=Theme.SUCCESS, fg=Theme.SUCCESS_FG)
