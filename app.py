@@ -152,10 +152,11 @@ class Laplace3DApp(tk.Tk):
             
         self.ax.set_facecolor('#1E1E1E')
         self.ax.tick_params(colors='white')
-        self.ax.xaxis.label.set_color('white')
-        self.ax.yaxis.label.set_color('white')
-        if hasattr(self.ax, 'zaxis'):
-            self.ax.zaxis.label.set_color('white')
+        
+        self.ax.set_xlabel('X Axis', color='white')
+        self.ax.set_ylabel('Y Axis', color='white')
+        if hasattr(self.ax, 'set_zlabel'):
+            self.ax.set_zlabel('Z Axis', color='white')
             
         curr_z = int(float(self.z_slider.get()))
         
