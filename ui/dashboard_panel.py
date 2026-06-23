@@ -13,10 +13,16 @@ class DashboardPanel(tk.LabelFrame):
             self.labels[lbl] = tk.Label(self, text=f"{lbl}: -", bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, anchor="w", font=('Consolas', 10))
             self.labels[lbl].pack(fill=tk.X, pady=8)
             
-        export_btn = tk.Button(self, text="Export CSV", bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, relief="flat", font=Theme.FONT_SMALL, command=self.export_callback)
-        export_btn.pack(fill=tk.X, side=tk.BOTTOM, pady=5)
-        export_btn.bind("<Enter>", lambda e: export_btn.config(bg=Theme.BORDER))
-        export_btn.bind("<Leave>", lambda e: export_btn.config(bg=Theme.BG_INPUT))
+        self.export_btn = tk.Button(self, text="Export CSV", bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, relief="flat", font=Theme.FONT_SMALL, command=self.export_callback)
+        self.export_btn.pack(fill=tk.X, side=tk.BOTTOM, pady=5)
+        self.export_btn.bind("<Enter>", lambda e: self.export_btn.config(bg=Theme.BORDER))
+        self.export_btn.bind("<Leave>", lambda e: self.export_btn.config(bg=Theme.BG_INPUT))
+        
+    def apply_theme(self):
+        self.configure(bg=Theme.BG_PANEL, fg=Theme.FG_MAIN)
+        for lbl in self.labels.values():
+            lbl.configure(bg=Theme.BG_PANEL, fg=Theme.FG_MAIN)
+        self.export_btn.configure(bg=Theme.BG_INPUT, fg=Theme.FG_MAIN)
         
     def update_metrics(self, elapsed_time, iter_count, error, max_t, min_t, center_t):
         self.labels["Time"].config(text=f"Time: {elapsed_time:.3f} s")

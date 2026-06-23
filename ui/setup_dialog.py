@@ -39,15 +39,6 @@ class SetupDialog:
         self.coord_cb.pack(side=tk.RIGHT)
         self.coord_cb.bind("<<ComboboxSelected>>", self.on_coord_change)
         
-        # Theme Selection
-        theme_frame = tk.Frame(inner_frame, bg=Theme.BG_PANEL)
-        theme_frame.pack(fill=tk.X, pady=5)
-        ttk.Label(theme_frame, text="Application Theme:", style='Setup.TLabel', background=Theme.BG_PANEL, width=20, anchor="w").pack(side=tk.LEFT)
-        
-        self.theme_var = tk.StringVar(value="Dark")
-        self.theme_cb = ttk.Combobox(theme_frame, textvariable=self.theme_var, values=["Dark", "Light"], state="readonly", style='Setup.TCombobox', width=13, font=Theme.FONT_REGULAR)
-        self.theme_cb.pack(side=tk.RIGHT)
-        
         # Dynamic Inputs Frame
         self.inputs_frame = tk.Frame(inner_frame, bg=Theme.BG_PANEL)
         self.inputs_frame.pack(fill=tk.X, pady=10)
@@ -111,8 +102,6 @@ class SetupDialog:
                 raise ValueError("Dimensions must be positive!")
                 
             coord = self.coord_var.get()
-            selected_theme = self.theme_var.get()
-            Theme.set_theme(selected_theme)
             self.setup_frame.place_forget()
             
             # Pass coord system along with dimensions

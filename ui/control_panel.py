@@ -44,4 +44,21 @@ class ControlPanel(tk.LabelFrame):
         self.solve_btn.bind("<Leave>", lambda e: self.solve_btn.config(bg=Theme.SUCCESS))
         
         self.equal_aspect_var = tk.BooleanVar(value=False)
-        tk.Checkbutton(self, text="Equal Aspect Ratio (True 3D Scale)", variable=self.equal_aspect_var, bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, selectcolor=Theme.BG_INPUT, activebackground=Theme.BG_PANEL, activeforeground=Theme.FG_MAIN, font=Theme.FONT_SMALL, command=self.aspect_ratio_callback).pack(anchor="w", pady=5)
+        self.equal_aspect_cb = tk.Checkbutton(self, text="Equal Aspect Ratio (True 3D Scale)", variable=self.equal_aspect_var, bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, selectcolor=Theme.BG_INPUT, activebackground=Theme.BG_PANEL, activeforeground=Theme.FG_MAIN, font=Theme.FONT_SMALL, command=self.aspect_ratio_callback)
+        self.equal_aspect_cb.pack(anchor="w", pady=5)
+
+    def apply_theme(self):
+        self.configure(bg=Theme.BG_PANEL, fg=Theme.FG_MAIN)
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Frame):
+                widget.configure(bg=Theme.BG_PANEL)
+                for child in widget.winfo_children():
+                    if isinstance(child, tk.Label):
+                        child.configure(bg=Theme.BG_PANEL, fg=Theme.FG_MAIN)
+                    elif isinstance(child, tk.Entry):
+                        child.configure(bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, insertbackground=Theme.FG_MAIN)
+            elif isinstance(widget, tk.Label):
+                widget.configure(bg=Theme.BG_PANEL)
+        
+        self.solve_btn.configure(bg=Theme.SUCCESS, fg=Theme.FG_MAIN)
+        self.equal_aspect_cb.configure(bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, selectcolor=Theme.BG_INPUT, activebackground=Theme.BG_PANEL, activeforeground=Theme.FG_MAIN)

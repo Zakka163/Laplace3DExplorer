@@ -23,6 +23,18 @@ class Laplace3DApp(tk.Tk):
         self.configure(bg=Theme.BG_ROOT)
         self.resizable(True, True)
         
+        # Create Menu Bar
+        self.menu_bar = tk.Menu(self)
+        self.config(menu=self.menu_bar)
+        
+        view_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="View", menu=view_menu)
+        
+        theme_menu = tk.Menu(view_menu, tearoff=0)
+        view_menu.add_cascade(label="Theme", menu=theme_menu)
+        theme_menu.add_command(label="Dark Mode", command=lambda: self.switch_theme("Dark"))
+        theme_menu.add_command(label="Light Mode", command=lambda: self.switch_theme("Light"))
+        
         self.solver_res = None
         self.coord_sys = "Cartesian"
         self.Lx = 1.0
@@ -40,7 +52,7 @@ class Laplace3DApp(tk.Tk):
         self.Ly = val2
         self.Lz = val3
         
-        # Apply the selected theme to the root window and loading frame
+        # Ensure loading frame honors current theme
         self.configure(bg=Theme.BG_ROOT)
         self.loading_frame.configure(bg=Theme.BG_ROOT)
         for child in self.loading_frame.winfo_children():
@@ -107,6 +119,41 @@ class Laplace3DApp(tk.Tk):
         # 3. Right Panel (Dashboard)
         self.dashboard_panel = DashboardPanel(main_frame, self.export_csv)
         self.dashboard_panel.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
+
+    def switch_theme(self, mode):
+        Theme.set_theme(mode)
+        
+        # Global configuration
+        self.configure(bg=Theme.BG_ROOT)
+        
+        style = tk.ttk.Style(self)
+        style.configure('TFrame', background=Theme.BG_ROOT)
+        style.configure('TLabel', background=Theme.BG_ROOT, foreground=Theme.FG_MAIN)
+        style.configure('TButton', background=Theme.SUCCESS, foreground=Theme.FG_MAIN, font=Theme.FONT_SMALL)
+        
+        # Setup Dialog if it exists
+        if hasattr(self, 'setup_dialog') and hasattr(self.setup_dialog, 'setup_frame'):
+            self.setup_dialog.setup_frame.configure(style='Setup.TFrame')
+            # The canvas and inner frames of SetupDialog are harder to update dynamically
+            # Usually users don't change theme while in setup dialog.
+            
+        if hasattr(self, 'loading_frame'):
+            self.loading_frame.configure(bg=Theme.BG_ROOT)
+            for child in self.loading_frame.winfo_children():
+                child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
+                
+        # Main UI container
+        if hasattr(self, 'main_container'):
+            self.main_container.configure(bg=Theme.BG_ROOT)
+            self.left_panel.configure(bg=Theme.BG_ROOT)
+            self.right_panel.configure(bg=Theme.BG_ROOT)
+            
+            if hasattr(self, 'control_panel'):
+                self.control_panel.apply_theme()
+            if hasattr(self, 'dashboard_panel'):
+                self.dashboard_panel.apply_theme()
+            if hasattr(self, 'visualization_panel'):
+                self.visualization_panel.apply_theme()
 
     def on_aspect_ratio_toggle(self):
         if hasattr(self, 'visualization_panel'):

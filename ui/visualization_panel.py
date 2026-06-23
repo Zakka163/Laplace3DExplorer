@@ -59,6 +59,28 @@ class VisualizationPanel(tk.Frame):
             child.config(background=Theme.TOOLBAR_BG)
         self.toolbar.update()
         
+    def apply_theme(self):
+        self.configure(bg=Theme.BG_ROOT)
+        for widget in self.winfo_children():
+            if isinstance(widget, tk.Frame):
+                widget.configure(bg=Theme.BG_ROOT)
+                for child in widget.winfo_children():
+                    if isinstance(child, tk.Label):
+                        child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
+                    elif isinstance(child, tk.Scale):
+                        child.configure(bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
+        
+        self.fig.patch.set_facecolor(Theme.BG_ROOT)
+        if hasattr(self, 'ax') and self.ax is not None:
+            self.ax.set_facecolor(Theme.BG_ROOT)
+            self.ax.tick_params(colors=Theme.FG_MAIN)
+        self.canvas.draw()
+        
+        self.toolbar.config(background=Theme.TOOLBAR_BG)
+        for child in self.toolbar.winfo_children():
+            child.config(background=Theme.TOOLBAR_BG)
+        self.toolbar.update()
+        
         # Bind mouse scroll for 3D zoom
         self.canvas.mpl_connect('scroll_event', self.on_scroll_zoom)
         
