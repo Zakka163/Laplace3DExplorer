@@ -113,7 +113,7 @@ class VisualizationPanel(tk.Frame):
                 
             print(f"[INFO] Rendering Visual: {v_type}")
             
-            if "2D" in v_type:
+            if "2D" in v_type or v_type == "Slice 3D":
                 self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
                 self.z_spin.pack(side=tk.LEFT, padx=2)
                 self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
@@ -189,6 +189,10 @@ class VisualizationPanel(tk.Frame):
                 else: self.cb.update_normal(self.cax)
             elif v_type == "Isosurface":
                 plotter.plot_isosurface(self.ax, X, Y, Z, T)
+            elif v_type == "Slice 3D":
+                self.cax = plotter.plot_slice3d(self.ax, X, Y, Z, T, curr_z, self.app.solver_res.Lx, self.app.solver_res.Ly, self.app.solver_res.Lz)
+                if not self.cb: self.cb = self.fig.colorbar(self.cax, ax=self.ax)
+                else: self.cb.update_normal(self.cax)
                 
             self.update_aspect_ratio()
             
@@ -208,7 +212,7 @@ class VisualizationPanel(tk.Frame):
             return
             
         v_type = self.vis_type.get()
-        if hasattr(self.ax, 'set_box_aspect') and v_type in ["Domain Geometry", "Scatter 3D", "Isosurface"]:
+        if hasattr(self.ax, 'set_box_aspect') and v_type in ["Domain Geometry", "Scatter 3D", "Isosurface", "Slice 3D"]:
             # Need to get equal_aspect_var from app controller's control panel
             if hasattr(self.app, 'control_panel') and self.app.control_panel.equal_aspect_var.get():
                 if v_type == "Domain Geometry":

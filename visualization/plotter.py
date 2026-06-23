@@ -70,4 +70,34 @@ def plot_domain_geometry(ax, Lx, Ly, Lz):
     ax.set_ylim([-0.1 * Ly, 1.1 * Ly if Ly > 0 else 1.0])
     ax.set_zlim([-0.1 * Lz, 1.1 * Lz if Lz > 0 else 1.0])
     
+def plot_slice3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
+    ax.clear()
+    
+    corners = np.array([
+        [0, 0, 0], [Lx, 0, 0], [Lx, Ly, 0], [0, Ly, 0],
+        [0, 0, Lz], [Lx, 0, Lz], [Lx, Ly, Lz], [0, Ly, Lz]
+    ])
+    
+    edges = [
+        [corners[0], corners[1]], [corners[1], corners[2]], [corners[2], corners[3]], [corners[3], corners[0]],
+        [corners[4], corners[5]], [corners[5], corners[6]], [corners[6], corners[7]], [corners[7], corners[4]],
+        [corners[0], corners[4]], [corners[1], corners[5]], [corners[2], corners[6]], [corners[3], corners[7]]
+    ]
+    for edge in edges:
+        ax.plot3D(*zip(*edge), color='gray', alpha=0.5, linewidth=1)
+        
+    X2D = X[:, :, z_idx]
+    Y2D = Y[:, :, z_idx]
+    T2D = T[:, :, z_idx]
+    z_val = Z[0, 0, z_idx]
+    
+    ct = ax.contourf(X2D, Y2D, T2D, zdir='z', offset=z_val, levels=50, cmap='jet', vmin=T.min(), vmax=T.max())
+    
+    ax.set_xlim3d(0, Lx)
+    ax.set_ylim3d(0, Ly)
+    ax.set_zlim3d(0, Lz)
+    
+    ax.set_title(f"Slice 3D (Z = {z_val:.2f})", color='white')
+    return ct
+    
     return None

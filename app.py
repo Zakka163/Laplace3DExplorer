@@ -150,7 +150,7 @@ class Laplace3DApp(tk.Tk):
             self.visualization_panel.z_slider.config(to=nz-1)
             self.visualization_panel.z_spin.config(to=nz-1)
             self.visualization_panel.z_var.set(nz//2)
-            self.visualization_panel.vis_cb.config(values=["Domain Geometry", "Heatmap 2D", "Contour 2D", "Surface 2D", "Scatter 3D", "Isosurface"])
+            self.visualization_panel.vis_cb.config(values=["Domain Geometry", "Heatmap 2D", "Contour 2D", "Surface 2D", "Slice 3D", "Scatter 3D", "Isosurface"])
             self.visualization_panel.vis_type.set("Heatmap 2D")
             
             self.title("Laplace 3D Explorer")
