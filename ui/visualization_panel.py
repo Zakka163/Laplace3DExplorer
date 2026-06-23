@@ -106,7 +106,7 @@ class VisualizationPanel(tk.Frame):
         if not hasattr(self.app, 'solver_res') or self.app.solver_res is None:
             # Generate a dummy grid for initial Domain Geometry rendering
             Lx, Ly, Lz = self.app.Lx, self.app.Ly, self.app.Lz
-            nx, ny, nz = 10, 10, 10
+            nx, ny, nz = 40, 40, 40
             if self.app.coord_sys == "Cartesian":
                 x = np.linspace(0, Lx, nx)
                 y = np.linspace(0, Ly, ny)

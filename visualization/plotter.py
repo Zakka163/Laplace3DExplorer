@@ -70,14 +70,14 @@ def plot_domain_geometry(ax, X, Y, Z):
     
     # Draw the bounding surface of the domain
     # Top and Bottom faces
-    ax.plot_surface(X[:, :, -1], Y[:, :, -1], Z[:, :, -1], color='cyan', alpha=0.3)
-    ax.plot_surface(X[:, :, 0], Y[:, :, 0], Z[:, :, 0], color='cyan', alpha=0.3)
+    ax.plot_surface(X[:, :, -1], Y[:, :, -1], Z[:, :, -1], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
+    ax.plot_surface(X[:, :, 0], Y[:, :, 0], Z[:, :, 0], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
     # Front and Back faces
-    ax.plot_surface(X[0, :, :], Y[0, :, :], Z[0, :, :], color='cyan', alpha=0.3)
-    ax.plot_surface(X[-1, :, :], Y[-1, :, :], Z[-1, :, :], color='cyan', alpha=0.3)
+    ax.plot_surface(X[0, :, :], Y[0, :, :], Z[0, :, :], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
+    ax.plot_surface(X[-1, :, :], Y[-1, :, :], Z[-1, :, :], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
     # Left and Right faces
-    ax.plot_surface(X[:, 0, :], Y[:, 0, :], Z[:, 0, :], color='cyan', alpha=0.3)
-    ax.plot_surface(X[:, -1, :], Y[:, -1, :], Z[:, -1, :], color='cyan', alpha=0.3)
+    ax.plot_surface(X[:, 0, :], Y[:, 0, :], Z[:, 0, :], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
+    ax.plot_surface(X[:, -1, :], Y[:, -1, :], Z[:, -1, :], color='cyan', alpha=0.3, linewidth=0, antialiased=True)
 
     ax.set_title("Domain Geometry", color='white')
     ax.set_xlim([X.min(), X.max()])
