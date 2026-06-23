@@ -24,7 +24,7 @@ class VisualizationPanel(tk.Frame):
         
         tk.Label(top_center, text="Visual Type:", bg="#1E1E1E", fg="white").pack(side=tk.LEFT, padx=5)
         self.vis_type = tk.StringVar(value="Domain Geometry")
-        self.vis_cb = ttk.Combobox(top_center, textvariable=self.vis_type, values=["Domain Geometry"], state="readonly")
+        self.vis_cb = ttk.Combobox(top_center, textvariable=self.vis_type, values=["Domain Geometry", "Heatmap 2D", "Contour 2D", "Surface 2D", "Cutaway 3D", "Scatter 3D", "Isosurface"], state="readonly")
         self.vis_cb.pack(side=tk.LEFT, padx=5)
         self.vis_cb.bind("<<ComboboxSelected>>", lambda e: self.render_visualization())
         
