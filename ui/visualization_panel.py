@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import numpy as np
+from ui.theme import Theme
 
 # These will be initialized properly during lazy loading in app.py
 FigureCanvasTkAgg = None
@@ -10,7 +11,7 @@ plotter = None
 
 class VisualizationPanel(tk.Frame):
     def __init__(self, parent, app_controller):
-        super().__init__(parent, bg="#1E1E1E")
+        super().__init__(parent, bg=Theme.BG_ROOT)
         self.app = app_controller # We need access to solver_res, Lx, Ly, Lz, etc.
         self._is_rendering = False
         self.current_v_type = None
@@ -19,16 +20,16 @@ class VisualizationPanel(tk.Frame):
         self.build_ui()
         
     def build_ui(self):
-        top_center = tk.Frame(self, bg="#1E1E1E")
+        top_center = tk.Frame(self, bg=Theme.BG_ROOT)
         top_center.pack(fill=tk.X, pady=5)
         
-        tk.Label(top_center, text="Visual Type:", bg="#1E1E1E", fg="white").pack(side=tk.LEFT, padx=5)
+        tk.Label(top_center, text="Visual Type:", bg=Theme.BG_ROOT, fg=Theme.FG_MAIN).pack(side=tk.LEFT, padx=5)
         self.vis_type = tk.StringVar(value="Domain Geometry")
         self.vis_cb = ttk.Combobox(top_center, textvariable=self.vis_type, values=["Domain Geometry", "Heatmap 2D", "Contour 2D", "Surface 2D", "Cutaway 3D", "Scatter 3D", "Isosurface"], state="readonly")
         self.vis_cb.pack(side=tk.LEFT, padx=5)
         self.vis_cb.bind("<<ComboboxSelected>>", lambda e: self.render_visualization())
         
-        self.lbl_z_slider = tk.Label(top_center, text="Z Height:", bg="#1E1E1E", fg="white")
+        self.lbl_z_slider = tk.Label(top_center, text="Z Height:", bg=Theme.BG_ROOT, fg=Theme.FG_MAIN)
         self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
         
         self.z_var = tk.IntVar(value=0)
@@ -39,23 +40,23 @@ class VisualizationPanel(tk.Frame):
         self.z_spin.bind('<Return>', self.on_spinbox_enter)
         
         # We set resolution=1 explicitly so the slider moves in integer steps (index layers)
-        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg="#1E1E1E", fg="white", highlightthickness=0, variable=self.z_var, showvalue=False, resolution=1, command=lambda v: self.render_visualization())
+        self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, highlightthickness=0, variable=self.z_var, showvalue=False, resolution=1, command=lambda v: self.render_visualization())
         self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         
         self.fig = Figure(figsize=(6, 5), dpi=100)
-        self.fig.patch.set_facecolor('#1E1E1E')
+        self.fig.patch.set_facecolor(Theme.BG_ROOT)
         self.ax = self.fig.add_subplot(111)
         
-        canvas_frame = tk.Frame(self, bg="#1E1E1E")
+        canvas_frame = tk.Frame(self, bg=Theme.BG_ROOT)
         canvas_frame.pack(fill=tk.BOTH, expand=True)
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=canvas_frame)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
         self.toolbar = NavigationToolbar2Tk(self.canvas, canvas_frame)
-        self.toolbar.config(background='#E0E0E0')
+        self.toolbar.config(background=Theme.TOOLBAR_BG)
         for child in self.toolbar.winfo_children():
-            child.config(background='#E0E0E0')
+            child.config(background=Theme.TOOLBAR_BG)
         self.toolbar.update()
         
         # Bind mouse scroll for 3D zoom
@@ -179,8 +180,8 @@ class VisualizationPanel(tk.Frame):
                     return # No need to re-render these when Z slider moves
                 self.ax.clear()
                 
-            self.ax.set_facecolor('#1E1E1E')
-            self.ax.tick_params(colors='white')
+            self.ax.set_facecolor(Theme.BG_ROOT)
+            self.ax.tick_params(colors=Theme.FG_MAIN)
                 
             if v_type == "Domain Geometry":
                 X_phys, Y_phys, Z_phys = self.get_physical_coordinates()

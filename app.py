@@ -13,13 +13,14 @@ from ui.setup_dialog import SetupDialog
 from ui.control_panel import ControlPanel
 from ui.dashboard_panel import DashboardPanel
 from ui.visualization_panel import VisualizationPanel
+from ui.theme import Theme
 
 class Laplace3DApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Laplace 3D Explorer")
         self.geometry("1200x700")
-        self.configure(bg="#1E1E1E")
+        self.configure(bg=Theme.BG_ROOT)
         self.resizable(True, True)
         
         self.solver_res = None
@@ -30,8 +31,8 @@ class Laplace3DApp(tk.Tk):
         
         self.setup_dialog = SetupDialog(self, self.on_setup_submit)
         
-        self.loading_frame = tk.Frame(self, bg="#1E1E1E")
-        tk.Label(self.loading_frame, text="Loading Physics Engine & 3D Visualizer...\nPlease wait...", bg="#1E1E1E", fg="white", font=('Arial', 18, 'italic'), justify=tk.CENTER).pack(pady=50)
+        self.loading_frame = tk.Frame(self, bg=Theme.BG_ROOT)
+        tk.Label(self.loading_frame, text="Loading Physics Engine & 3D Visualizer...\nPlease wait...", bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, font=Theme.FONT_TITLE, justify=tk.CENTER).pack(pady=50)
 
     def on_setup_submit(self, coord_sys, val1, val2, val3):
         self.coord_sys = coord_sys
@@ -82,9 +83,9 @@ class Laplace3DApp(tk.Tk):
         # Configure global styles for ttk
         style = tk.ttk.Style(self)
         style.theme_use('clam')
-        style.configure('TFrame', background='#1E1E1E')
-        style.configure('TLabel', background='#1E1E1E', foreground='white')
-        style.configure('TButton', background='#006400', foreground='white', font=('Arial', 10, 'bold'))
+        style.configure('TFrame', background=Theme.BG_ROOT)
+        style.configure('TLabel', background=Theme.BG_ROOT, foreground=Theme.FG_MAIN)
+        style.configure('TButton', background=Theme.SUCCESS, foreground=Theme.FG_MAIN, font=Theme.FONT_SMALL)
         
         main_frame = tk.ttk.Frame(self)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)

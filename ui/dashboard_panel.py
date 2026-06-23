@@ -1,18 +1,22 @@
 import tkinter as tk
+from ui.theme import Theme
 
 class DashboardPanel(tk.LabelFrame):
     def __init__(self, parent, export_callback):
-        super().__init__(parent, text="Dashboard & Export", bg="#2B2B2B", fg="white", font=('Arial', 12, 'bold'), padx=10, pady=10)
+        super().__init__(parent, text="Dashboard & Export", bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, font=Theme.FONT_BOLD, padx=10, pady=10)
         self.export_callback = export_callback
         self.labels = {}
         self.build_ui()
         
     def build_ui(self):
         for lbl in ["Time", "Iter", "Error", "Max Temp", "Min Temp", "Center Temp"]:
-            self.labels[lbl] = tk.Label(self, text=f"{lbl}: -", bg="#2B2B2B", fg="white", anchor="w", font=('Consolas', 10))
+            self.labels[lbl] = tk.Label(self, text=f"{lbl}: -", bg=Theme.BG_PANEL, fg=Theme.FG_MAIN, anchor="w", font=('Consolas', 10))
             self.labels[lbl].pack(fill=tk.X, pady=8)
             
-        tk.Button(self, text="Export CSV", bg="#333333", fg="white", relief="flat", command=self.export_callback).pack(fill=tk.X, side=tk.BOTTOM, pady=5)
+        export_btn = tk.Button(self, text="Export CSV", bg=Theme.BG_INPUT, fg=Theme.FG_MAIN, relief="flat", font=Theme.FONT_SMALL, command=self.export_callback)
+        export_btn.pack(fill=tk.X, side=tk.BOTTOM, pady=5)
+        export_btn.bind("<Enter>", lambda e: export_btn.config(bg=Theme.BORDER))
+        export_btn.bind("<Leave>", lambda e: export_btn.config(bg=Theme.BG_INPUT))
         
     def update_metrics(self, elapsed_time, iter_count, error, max_t, min_t, center_t):
         self.labels["Time"].config(text=f"Time: {elapsed_time:.3f} s")
