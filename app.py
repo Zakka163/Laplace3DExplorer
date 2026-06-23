@@ -146,6 +146,8 @@ class Laplace3DApp(tk.Tk):
         self.fig = Figure(figsize=(6, 5), dpi=100)
         self.fig.patch.set_facecolor('#1E1E1E')
         self.ax = self.fig.add_subplot(111)
+        self.current_v_type = None
+        self.cb = None
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=center_panel)
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
@@ -230,12 +232,23 @@ class Laplace3DApp(tk.Tk):
             self.z_spin.pack_forget()
             self.z_slider.pack_forget()
             
-        self.fig.clf()
-        
-        if "3D" in v_type or "Iso" in v_type or "Surface" in v_type or "Geometry" in v_type:
-            self.ax = self.fig.add_subplot(111, projection='3d')
+        # Performance optimization: Don't recreate subplot if type hasn't changed
+        if self.current_v_type != v_type:
+            self.fig.clf()
+            self.cb = None
+            if "3D" in v_type or "Iso" in v_type or "Surface" in v_type or "Geometry" in v_type:
+                self.ax = self.fig.add_subplot(111, projection='3d')
+            else:
+                self.ax = self.fig.add_subplot(111)
+            self.current_v_type = v_type
         else:
-            self.ax = self.fig.add_subplot(111)
+            # For 3D, don't clear scatter/isosurface on slider move because they don't depend on Z
+            if v_type in ["Scatter 3D", "Isosurface", "Domain Geometry"]:
+                return # No need to re-render these when Z slider moves!
+            self.ax.clear()
+            if self.cb:
+                self.cb.remove()
+                self.cb = None
             
         self.ax.set_facecolor('#1E1E1E')
         self.ax.tick_params(colors='white')
@@ -262,14 +275,17 @@ class Laplace3DApp(tk.Tk):
         if v_type == "Domain Geometry":
             plotter.plot_domain_geometry(self.ax, self.solver_res.Lx, self.solver_res.Ly, self.solver_res.Lz)
         elif v_type == "Heatmap 2D":
-            plotter.plot_heatmap(self.ax, X2D, Y2D, T2D)
+            self.cax = plotter.plot_heatmap(self.ax, X2D, Y2D, T2D)
+            self.cb = self.fig.colorbar(self.cax, ax=self.ax)
         elif v_type == "Contour 2D":
-            plotter.plot_contour(self.ax, X2D, Y2D, T2D)
+            self.cax = plotter.plot_contour(self.ax, X2D, Y2D, T2D)
+            self.cb = self.fig.colorbar(self.cax, ax=self.ax)
         elif v_type == "Surface 2D":
-            plotter.plot_surface(self.ax, X2D, Y2D, T2D)
+            self.cax = plotter.plot_surface(self.ax, X2D, Y2D, T2D)
+            self.cb = self.fig.colorbar(self.cax, ax=self.ax)
         elif v_type == "Scatter 3D":
             self.cax = plotter.plot_scatter3d(self.ax, X, Y, Z, T)
-            self.fig.colorbar(self.cax, ax=self.ax)
+            self.cb = self.fig.colorbar(self.cax, ax=self.ax)
         elif v_type == "Isosurface":
             plotter.plot_isosurface(self.ax, X, Y, Z, T)
             
