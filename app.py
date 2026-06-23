@@ -129,7 +129,7 @@ class Laplace3DApp(tk.Tk):
         self.sidebar_frame = tk.Frame(self.h_paned, bg=Theme.BG_ROOT)
         self.h_paned.add(self.sidebar_frame, stretch="never")
         
-        self.control_panel = ControlPanel(self.sidebar_frame, self.solve_system, self.on_aspect_ratio_toggle, self.export_csv, self.coord_sys)
+        self.control_panel = ControlPanel(self.sidebar_frame, self.solve_system, self.export_csv, self.coord_sys)
         self.control_panel.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
         
         # --- CENTER VISUALIZATION ---
@@ -148,7 +148,7 @@ class Laplace3DApp(tk.Tk):
         
     def toggle_panels(self):
         if self.show_sidebar.get():
-            self.h_paned.insert(0, self.sidebar_frame, stretch="never")
+            self.h_paned.add(self.sidebar_frame, before=self.viz_frame, stretch="never")
         else:
             self.h_paned.forget(self.sidebar_frame)
             
