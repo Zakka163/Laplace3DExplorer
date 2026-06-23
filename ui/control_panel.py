@@ -38,35 +38,65 @@ class ControlPanel(tk.LabelFrame):
             self.inputs[key2] = e2
             
         if self.coord_sys == "Cartesian":
-            labels = ["Left (x=0)", "Right (x=Lx)", "Front (y=0)", "Back (y=Ly)", "Bottom (z=0)", "Top (z=Lz)"]
+            labels = ["Left", "Right", "Front", "Back", "Bottom", "Top"]
             title1, title2, title3 = "X Boundaries", "Y Boundaries", "Z Boundaries"
+            infos = {
+                title1: "Left Boundary is x = 0\nRight Boundary is x = Lx",
+                title2: "Front Boundary is y = 0\nBack Boundary is y = Ly",
+                title3: "Bottom Boundary is z = 0\nTop Boundary is z = Lz"
+            }
         elif self.coord_sys == "Cylindrical":
-            labels = ["Inner R (r=\u0394r)", "Outer R (r=R)", "Start \u0398 (\u03B8=0)", "End \u0398 (\u03B8=\u0398)", "Bottom (z=0)", "Top (z=Lz)"]
+            labels = ["Inner R", "Outer R", "Start \u0398", "End \u0398", "Bottom", "Top"]
             title1, title2, title3 = "R Boundaries", "\u0398 Boundaries", "Z Boundaries"
+            infos = {
+                title1: "Inner Radius is r = \u0394r\nOuter Radius is r = R",
+                title2: "Start angle is \u03B8 = 0\nEnd angle is \u03B8 = \u0398",
+                title3: "Bottom Boundary is z = 0\nTop Boundary is z = Lz"
+            }
         else: # Spherical
-            labels = ["Inner R (r=\u0394r)", "Outer R (r=R)", "Start \u0398 (\u03B8=0)", "End \u0398 (\u03B8=\u0398)", "Start \u03A6 (\u03C6=0)", "End \u03A6 (\u03C6=\u03A6)"]
+            labels = ["Inner R", "Outer R", "Start \u0398", "End \u0398", "Start \u03A6", "End \u03A6"]
             title1, title2, title3 = "R Boundaries", "\u0398 Boundaries", "\u03A6 Boundaries"
+            infos = {
+                title1: "Inner Radius is r = \u0394r\nOuter Radius is r = R",
+                title2: "Start polar angle is \u03B8 = 0\nEnd polar angle is \u03B8 = \u0398",
+                title3: "Start azimuthal angle is \u03C6 = 0\nEnd azimuthal angle is \u03C6 = \u03A6"
+            }
 
         def add_separator():
             tk.Frame(self.main_frame, width=1, bg=Theme.BORDER).pack(side=tk.LEFT, fill=tk.Y, padx=15, pady=5)
 
+        def add_group_header(parent, title):
+            f_hdr = tk.Frame(parent, bg=Theme.BG_PANEL)
+            f_hdr.pack(side=tk.TOP, fill=tk.X, pady=(0, 5))
+            
+            lbl = tk.Label(f_hdr, text=title, font=('Segoe UI', 9, 'bold'), fg=Theme.FG_SUB, bg=Theme.BG_PANEL)
+            lbl.pack(side=tk.LEFT, padx=(5, 2))
+            
+            info_lbl = tk.Label(f_hdr, text="ⓘ", font=('Segoe UI', 9), fg=Theme.SUCCESS, bg=Theme.BG_PANEL, cursor="hand2")
+            info_lbl.pack(side=tk.LEFT)
+            
+            def show_info(e):
+                from tkinter import messagebox
+                messagebox.showinfo(f"{title} Details", infos[title])
+            info_lbl.bind("<Button-1>", show_info)
+
         grp_x = tk.Frame(self.main_frame, bg=Theme.BG_PANEL)
         grp_x.pack(side=tk.LEFT, padx=5, pady=0, fill=tk.Y)
-        tk.Label(grp_x, text=title1, font=('Segoe UI', 9, 'bold'), fg=Theme.FG_SUB, bg=Theme.BG_PANEL).pack(anchor="c", padx=5, pady=(0, 5))
+        add_group_header(grp_x, title1)
         add_input_pair(grp_x, labels[0], 100, labels[1], 50, 'left', 'right')
         
         add_separator()
         
         grp_y = tk.Frame(self.main_frame, bg=Theme.BG_PANEL)
         grp_y.pack(side=tk.LEFT, padx=5, pady=0, fill=tk.Y)
-        tk.Label(grp_y, text=title2, font=('Segoe UI', 9, 'bold'), fg=Theme.FG_SUB, bg=Theme.BG_PANEL).pack(anchor="c", padx=5, pady=(0, 5))
+        add_group_header(grp_y, title2)
         add_input_pair(grp_y, labels[2], 0, labels[3], 100, 'front', 'back')
         
         add_separator()
         
         grp_z = tk.Frame(self.main_frame, bg=Theme.BG_PANEL)
         grp_z.pack(side=tk.LEFT, padx=5, pady=0, fill=tk.Y)
-        tk.Label(grp_z, text=title3, font=('Segoe UI', 9, 'bold'), fg=Theme.FG_SUB, bg=Theme.BG_PANEL).pack(anchor="c", padx=5, pady=(0, 5))
+        add_group_header(grp_z, title3)
         add_input_pair(grp_z, labels[4], 75, labels[5], 25, 'bottom', 'top')
         
         add_separator()

@@ -48,7 +48,7 @@ class VisualizationPanel(tk.Frame):
         
         self.z_var = tk.IntVar(value=0)
         # Vertical scale going from top to bottom (from_=10, to=0)
-        self.z_slider = tk.Scale(self.side_panel, from_=10, to=0, orient=tk.VERTICAL, bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, highlightthickness=0, variable=self.z_var, showvalue=False, resolution=1, length=300, command=lambda v: self.render_visualization())
+        self.z_slider = tk.Scale(self.side_panel, from_=10, to=0, orient=tk.VERTICAL, bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, highlightthickness=0, variable=self.z_var, showvalue=False, resolution=1, length=200, command=lambda v: self.render_visualization())
         self.z_slider.pack(side=tk.TOP, fill=tk.Y, expand=True, pady=5)
         
         # Canvas Frame (Plot Area)
