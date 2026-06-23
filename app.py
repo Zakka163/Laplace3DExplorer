@@ -85,7 +85,8 @@ class Laplace3DApp(tk.Tk):
         vis_cb.pack(side=tk.LEFT, padx=5)
         vis_cb.bind("<<ComboboxSelected>>", lambda e: self.render_visualization())
         
-        tk.Label(top_center, text="Z Layer:", bg="#1E1E1E", fg="white").pack(side=tk.LEFT, padx=15)
+        self.lbl_z_slider = tk.Label(top_center, text="Z Layer:", bg="#1E1E1E", fg="white")
+        self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
         self.z_slider = tk.Scale(top_center, from_=0, to=10, orient=tk.HORIZONTAL, bg="#1E1E1E", fg="white", highlightthickness=0, command=lambda v: self.render_visualization())
         self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
         
@@ -147,11 +148,20 @@ class Laplace3DApp(tk.Tk):
             messagebox.showerror("Error", str(e))
             self.title("Laplace 3D Explorer")
             
-    def render_visualization(self):
+    def render_visualization(self, event=None):
         if self.solver_res is None: return
         
-        self.fig.clf()
         v_type = self.vis_type.get()
+        
+        # Toggle slider visibility
+        if "2D" in v_type:
+            self.lbl_z_slider.pack(side=tk.LEFT, padx=15)
+            self.z_slider.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        else:
+            self.lbl_z_slider.pack_forget()
+            self.z_slider.pack_forget()
+            
+        self.fig.clf()
         
         if "3D" in v_type or "Iso" in v_type or "Surface" in v_type or "Geometry" in v_type:
             self.ax = self.fig.add_subplot(111, projection='3d')
