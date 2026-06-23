@@ -13,6 +13,7 @@ from ui.setup_dialog import SetupDialog
 from ui.control_panel import ControlPanel
 from ui.dashboard_panel import DashboardPanel
 from ui.visualization_panel import VisualizationPanel
+from ui.log_panel import LogPanel
 from ui.theme import Theme
 
 class Laplace3DApp(tk.Tk):
@@ -29,6 +30,12 @@ class Laplace3DApp(tk.Tk):
         
         view_menu = tk.Menu(self.menu_bar, tearoff=0)
         self.menu_bar.add_cascade(label="View", menu=view_menu)
+        
+        self.show_sidebar = tk.BooleanVar(value=True)
+        self.show_terminal = tk.BooleanVar(value=True)
+        view_menu.add_checkbutton(label="Toggle Sidebar", variable=self.show_sidebar, command=self.toggle_panels)
+        view_menu.add_checkbutton(label="Toggle Terminal", variable=self.show_terminal, command=self.toggle_panels)
+        view_menu.add_separator()
         
         theme_menu = tk.Menu(view_menu, tearoff=0)
         view_menu.add_cascade(label="Theme", menu=theme_menu)
@@ -105,20 +112,48 @@ class Laplace3DApp(tk.Tk):
         style.configure('TLabel', background=Theme.BG_ROOT, foreground=Theme.FG_MAIN)
         style.configure('TButton', background=Theme.SUCCESS, foreground=Theme.FG_MAIN, font=Theme.FONT_SMALL)
         
-        main_frame = tk.ttk.Frame(self)
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        # Main Vertical Splitter (Top: UI, Bottom: Log)
+        self.v_paned = tk.ttk.PanedWindow(self, orient=tk.VERTICAL)
+        self.v_paned.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # 1. Left Panel (Control Panel)
-        self.control_panel = ControlPanel(main_frame, self.solve_system, self.on_aspect_ratio_toggle, self.coord_sys)
-        self.control_panel.pack(side=tk.LEFT, fill=tk.Y, padx=5)
+        # Top Horizontal Splitter (Left: Sidebar, Right: Viz)
+        self.h_paned = tk.ttk.PanedWindow(self.v_paned, orient=tk.HORIZONTAL)
+        self.v_paned.add(self.h_paned, weight=1)
         
-        # 2. Center Panel (Visualization)
-        self.visualization_panel = VisualizationPanel(main_frame, self)
-        self.visualization_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
+        # --- LEFT SIDEBAR (Control + Dashboard) ---
+        self.sidebar_frame = tk.Frame(self.h_paned, bg=Theme.BG_ROOT)
+        self.h_paned.add(self.sidebar_frame, weight=0)
         
-        # 3. Right Panel (Dashboard)
-        self.dashboard_panel = DashboardPanel(main_frame, self.export_csv)
-        self.dashboard_panel.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
+        self.control_panel = ControlPanel(self.sidebar_frame, self.solve_system, self.on_aspect_ratio_toggle, self.coord_sys)
+        self.control_panel.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+        
+        self.dashboard_panel = DashboardPanel(self.sidebar_frame, self.export_csv)
+        self.dashboard_panel.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+        
+        # --- CENTER VISUALIZATION ---
+        self.viz_frame = tk.Frame(self.h_paned, bg=Theme.BG_ROOT)
+        self.h_paned.add(self.viz_frame, weight=1)
+        
+        self.visualization_panel = VisualizationPanel(self.viz_frame, self)
+        self.visualization_panel.pack(fill=tk.BOTH, expand=True)
+        
+        # --- BOTTOM LOG PANEL ---
+        self.log_panel = LogPanel(self.v_paned)
+        self.v_paned.add(self.log_panel, weight=0)
+        
+        # Save references for toggling
+        self.main_container = self.v_paned
+        
+    def toggle_panels(self):
+        if self.show_sidebar.get():
+            self.h_paned.insert(0, self.sidebar_frame, weight=0)
+        else:
+            self.h_paned.forget(self.sidebar_frame)
+            
+        if self.show_terminal.get():
+            self.v_paned.add(self.log_panel, weight=0)
+        else:
+            self.v_paned.forget(self.log_panel)
 
     def switch_theme(self, mode):
         Theme.set_theme(mode)
@@ -144,9 +179,10 @@ class Laplace3DApp(tk.Tk):
                 
         # Main UI container
         if hasattr(self, 'main_container'):
-            self.main_container.configure(bg=Theme.BG_ROOT)
-            self.left_panel.configure(bg=Theme.BG_ROOT)
-            self.right_panel.configure(bg=Theme.BG_ROOT)
+            if hasattr(self, 'sidebar_frame'):
+                self.sidebar_frame.configure(bg=Theme.BG_ROOT)
+            if hasattr(self, 'viz_frame'):
+                self.viz_frame.configure(bg=Theme.BG_ROOT)
             
             if hasattr(self, 'control_panel'):
                 self.control_panel.apply_theme()
@@ -154,6 +190,8 @@ class Laplace3DApp(tk.Tk):
                 self.dashboard_panel.apply_theme()
             if hasattr(self, 'visualization_panel'):
                 self.visualization_panel.apply_theme()
+            if hasattr(self, 'log_panel'):
+                self.log_panel.apply_theme()
 
     def on_aspect_ratio_toggle(self):
         if hasattr(self, 'visualization_panel'):
