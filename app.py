@@ -114,7 +114,7 @@ class Laplace3DApp(tk.Tk):
         
         tk.Label(left_panel, text="", bg="#2B2B2B").pack(pady=5)
         
-        self.inputs['dx'] = add_input("Grid dx:", 0.05)
+        self.inputs['dx'] = add_input("Grid Resolution:", 0.05)
         
         solve_btn = tk.Button(left_panel, text="SOLVE", bg="#006400", fg="white", font=('Arial', 10, 'bold'), relief="flat", command=self.solve_system)
         solve_btn.pack(fill=tk.X, pady=25)
