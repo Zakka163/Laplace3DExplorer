@@ -6,6 +6,7 @@ import os
 # Initialize globals to None to satisfy IDE static analyzers (Pylance/Pyright)
 np = None
 FigureCanvasTkAgg = None
+NavigationToolbar2Tk = None
 Figure = None
 Solver3D = None
 plotter = None
@@ -71,11 +72,11 @@ class Laplace3DApp(tk.Tk):
     def load_heavy_libraries(self):
         print("[INFO] Loading Machine Learning & Physics Libraries...")
         
-        global np, FigureCanvasTkAgg, Figure, Solver3D, plotter
+        global np, FigureCanvasTkAgg, NavigationToolbar2Tk, Figure, Solver3D, plotter
         import numpy as np
         import matplotlib
         matplotlib.use("TkAgg")
-        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
         from matplotlib.figure import Figure
         from core.solver import Solver3D
         from visualization import plotter
@@ -159,8 +160,18 @@ class Laplace3DApp(tk.Tk):
         self.current_v_type = None
         self.cb = None
         
-        self.canvas = FigureCanvasTkAgg(self.fig, master=center_panel)
-        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        # We need a frame for the canvas and toolbar so the toolbar goes below the canvas
+        canvas_frame = tk.Frame(center_panel, bg="#1E1E1E")
+        canvas_frame.pack(fill=tk.BOTH, expand=True)
+        
+        self.canvas = FigureCanvasTkAgg(self.fig, master=canvas_frame)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        
+        self.toolbar = NavigationToolbar2Tk(self.canvas, canvas_frame)
+        self.toolbar.config(background='#2B2B2B')
+        for child in self.toolbar.winfo_children():
+            child.config(background='#2B2B2B')
+        self.toolbar.update()
         
         # RIGHT PANEL
         right_panel = tk.LabelFrame(main_frame, text="Dashboard & Export", bg="#2B2B2B", fg="white", font=('Arial', 12, 'bold'), padx=10, pady=10)
@@ -273,12 +284,7 @@ class Laplace3DApp(tk.Tk):
                 if v_type in ["Scatter 3D", "Isosurface", "Domain Geometry"]:
                     return # No need to re-render these when Z slider moves!
                 self.ax.clear()
-                if self.cb:
-                    try:
-                        self.cb.remove()
-                    except Exception:
-                        pass
-                    self.cb = None
+                # Do NOT remove self.cb here; we will reuse it to prevent it from stealing space repeatedly!
                 
             self.ax.set_facecolor('#1E1E1E')
             self.ax.tick_params(colors='white')
@@ -317,16 +323,20 @@ class Laplace3DApp(tk.Tk):
                 plotter.plot_domain_geometry(self.ax, self.solver_res.Lx, self.solver_res.Ly, self.solver_res.Lz)
             elif v_type == "Heatmap 2D":
                 self.cax = plotter.plot_heatmap(self.ax, X2D, Y2D, T2D)
-                self.cb = self.fig.colorbar(self.cax, ax=self.ax)
+                if not self.cb: self.cb = self.fig.colorbar(self.cax, ax=self.ax)
+                else: self.cb.update_normal(self.cax)
             elif v_type == "Contour 2D":
                 self.cax = plotter.plot_contour(self.ax, X2D, Y2D, T2D)
-                self.cb = self.fig.colorbar(self.cax, ax=self.ax)
+                if not self.cb: self.cb = self.fig.colorbar(self.cax, ax=self.ax)
+                else: self.cb.update_normal(self.cax)
             elif v_type == "Surface 2D":
                 self.cax = plotter.plot_surface(self.ax, X2D, Y2D, T2D)
-                self.cb = self.fig.colorbar(self.cax, ax=self.ax)
+                if not self.cb: self.cb = self.fig.colorbar(self.cax, ax=self.ax)
+                else: self.cb.update_normal(self.cax)
             elif v_type == "Scatter 3D":
                 self.cax = plotter.plot_scatter3d(self.ax, X, Y, Z, T)
-                self.cb = self.fig.colorbar(self.cax, ax=self.ax)
+                if not self.cb: self.cb = self.fig.colorbar(self.cax, ax=self.ax)
+                else: self.cb.update_normal(self.cax)
             elif v_type == "Isosurface":
                 plotter.plot_isosurface(self.ax, X, Y, Z, T)
                 
