@@ -4,15 +4,14 @@ import time
 import os
 
 class StartupDialog(tk.Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, on_complete):
         super().__init__(master)
+        self.on_complete = on_complete
         print("[INFO] Opening Setup Dialog...")
         self.title("Simulation Setup")
         self.geometry("350x250")
         self.configure(bg="#2B2B2B")
         self.resizable(False, False)
-        
-        self.result = None
         
         tk.Label(self, text="Define Domain Size", bg="#2B2B2B", fg="white", font=('Arial', 14, 'bold')).pack(pady=15)
         
@@ -34,7 +33,6 @@ class StartupDialog(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
         self.transient(master)
         self.grab_set()
-        self.wait_window(self)
         
     def on_submit(self):
         try:
@@ -44,31 +42,33 @@ class StartupDialog(tk.Toplevel):
             if Lx <= 0 or Ly <= 0 or Lz <= 0:
                 raise ValueError("Dimensions must be positive!")
             print(f"[INFO] Environment Created: Lx={Lx}, Ly={Ly}, Lz={Lz}")
-            self.result = (Lx, Ly, Lz)
             self.destroy()
+            self.on_complete((Lx, Ly, Lz))
         except ValueError:
             print("[ERROR] Invalid dimensions entered.")
             messagebox.showerror("Error", "Invalid dimensions! Please enter positive numbers.")
             
     def on_cancel(self):
-        self.result = None
         self.destroy()
+        self.on_complete(None)
 
 class Laplace3DApp(tk.Tk):
     def __init__(self):
         super().__init__()
         self.withdraw()
-        self.after(10, self.show_startup)
+        self.after(50, self.show_startup)
         
     def show_startup(self):
         print("[INFO] Calling Startup Dialog...")
-        dialog = StartupDialog(self)
-        if not dialog.result:
+        StartupDialog(self, self.on_startup_complete)
+
+    def on_startup_complete(self, result):
+        if not result:
             print("[INFO] Setup Dialog closed without result. Exiting...")
             self.destroy()
             return
             
-        self.Lx, self.Ly, self.Lz = dialog.result
+        self.Lx, self.Ly, self.Lz = result
         
         print("[INFO] Loading Machine Learning & Physics Libraries... Please Wait...")
         self.update()
