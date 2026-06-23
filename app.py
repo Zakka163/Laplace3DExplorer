@@ -3,82 +3,66 @@ from tkinter import ttk, messagebox, filedialog
 import time
 import os
 
-class StartupDialog(tk.Toplevel):
-    def __init__(self, master, on_complete):
-        super().__init__(master)
-        self.on_complete = on_complete
-        print("[INFO] Opening Setup Dialog...")
-        self.title("Simulation Setup")
+class Laplace3DApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Laplace 3D Explorer")
         self.geometry("1200x700")
         self.configure(bg="#1E1E1E")
         self.resizable(True, True)
         
-        # Center container
-        container = tk.Frame(self, bg="#1E1E1E")
-        container.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        self.solver_res = None
+        self.Lx = 1.0
+        self.Ly = 1.0
+        self.Lz = 1.0
         
-        tk.Label(container, text="Define Domain Size", bg="#1E1E1E", fg="white", font=('Arial', 24, 'bold')).pack(pady=25)
+        self.build_setup_ui()
         
-        frame = tk.Frame(container, bg="#1E1E1E")
-        frame.pack(pady=10)
+    def build_setup_ui(self):
+        self.setup_frame = tk.Frame(self, bg="#1E1E1E")
+        self.setup_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
         
-        self.inputs = {}
+        tk.Label(self.setup_frame, text="Define Domain Size", bg="#1E1E1E", fg="white", font=('Arial', 24, 'bold')).pack(pady=25)
+        
+        inputs_frame = tk.Frame(self.setup_frame, bg="#1E1E1E")
+        inputs_frame.pack(pady=10)
+        
+        self.setup_inputs = {}
         for lbl, key in [("Length X (Lx):", "Lx"), ("Length Y (Ly):", "Ly"), ("Length Z (Lz):", "Lz")]:
-            f = tk.Frame(frame, bg="#1E1E1E")
+            f = tk.Frame(inputs_frame, bg="#1E1E1E")
             f.pack(fill=tk.X, pady=10)
             tk.Label(f, text=lbl, bg="#1E1E1E", fg="white", width=15, anchor="w", font=('Arial', 14)).pack(side=tk.LEFT)
             e = tk.Entry(f, width=15, bg="#404040", fg="white", insertbackground="white", relief="flat", font=('Arial', 14))
             e.insert(0, "1.0")
             e.pack(side=tk.RIGHT, padx=10)
-            self.inputs[key] = e
+            self.setup_inputs[key] = e
             
-        tk.Button(container, text="Create Environment", bg="#006400", fg="white", font=('Arial', 14, 'bold'), relief="flat", command=self.on_submit, padx=20, pady=10).pack(pady=40)
+        tk.Button(self.setup_frame, text="Create Environment", bg="#006400", fg="white", font=('Arial', 14, 'bold'), relief="flat", command=self.on_submit_setup, padx=20, pady=10).pack(pady=40)
         
-        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
-        
-        # Bring to front instead of grab/transient which hides it if master is hidden
-        self.lift()
-        self.attributes('-topmost', True)
-        self.after_idle(self.attributes, '-topmost', False)
-        
-    def on_submit(self):
+        self.loading_frame = tk.Frame(self, bg="#1E1E1E")
+        tk.Label(self.loading_frame, text="Loading Physics Engine & 3D Visualizer...\nPlease wait...", bg="#1E1E1E", fg="white", font=('Arial', 18, 'italic'), justify=tk.CENTER).pack(pady=50)
+
+    def on_submit_setup(self):
         try:
-            Lx = float(self.inputs["Lx"].get())
-            Ly = float(self.inputs["Ly"].get())
-            Lz = float(self.inputs["Lz"].get())
-            if Lx <= 0 or Ly <= 0 or Lz <= 0:
+            self.Lx = float(self.setup_inputs["Lx"].get())
+            self.Ly = float(self.setup_inputs["Ly"].get())
+            self.Lz = float(self.setup_inputs["Lz"].get())
+            if self.Lx <= 0 or self.Ly <= 0 or self.Lz <= 0:
                 raise ValueError("Dimensions must be positive!")
-            print(f"[INFO] Environment Created: Lx={Lx}, Ly={Ly}, Lz={Lz}")
-            self.destroy()
-            self.on_complete((Lx, Ly, Lz))
+                
+            # Transition to Loading
+            self.setup_frame.place_forget()
+            self.loading_frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+            self.update()
+            
+            # Delay heavy load slightly so UI can update the loading text
+            self.after(50, self.load_heavy_libraries)
+            
         except ValueError:
-            print("[ERROR] Invalid dimensions entered.")
             messagebox.showerror("Error", "Invalid dimensions! Please enter positive numbers.")
-            
-    def on_cancel(self):
-        self.destroy()
-        self.on_complete(None)
 
-class Laplace3DApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.withdraw()
-        self.after(50, self.show_startup)
-        
-    def show_startup(self):
-        print("[INFO] Calling Startup Dialog...")
-        StartupDialog(self, self.on_startup_complete)
-
-    def on_startup_complete(self, result):
-        if not result:
-            print("[INFO] Setup Dialog closed without result. Exiting...")
-            self.destroy()
-            return
-            
-        self.Lx, self.Ly, self.Lz = result
-        
-        print("[INFO] Loading Machine Learning & Physics Libraries... Please Wait...")
-        self.update()
+    def load_heavy_libraries(self):
+        print("[INFO] Loading Machine Learning & Physics Libraries...")
         
         global np, FigureCanvasTkAgg, Figure, Solver3D, plotter
         import numpy as np
@@ -89,15 +73,9 @@ class Laplace3DApp(tk.Tk):
         from core.solver import Solver3D
         from visualization import plotter
         
-        self.title("Laplace 3D Explorer")
-        self.geometry("1200x700")
-        self.configure(bg="#1E1E1E")
-        
-        self.solver_res = None
-        
+        self.loading_frame.place_forget()
         print("[INFO] Building Main GUI...")
         self.build_ui()
-        self.deiconify()
         print("[INFO] Application Ready.")
         
         # Render initial domain geometry
