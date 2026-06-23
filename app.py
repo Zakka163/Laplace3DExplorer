@@ -1,16 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
-import numpy as np
 import time
 import os
-
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
-
-from core.solver import Solver3D
-from visualization import plotter
 
 class StartupDialog(tk.Toplevel):
     def __init__(self, master):
@@ -73,6 +64,18 @@ class Laplace3DApp(tk.Tk):
             return
             
         self.Lx, self.Ly, self.Lz = dialog.result
+        
+        print("[INFO] Loading Machine Learning & Physics Libraries... Please Wait...")
+        self.update()
+        
+        global np, FigureCanvasTkAgg, Figure, Solver3D, plotter
+        import numpy as np
+        import matplotlib
+        matplotlib.use("TkAgg")
+        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+        from matplotlib.figure import Figure
+        from core.solver import Solver3D
+        from visualization import plotter
         
         self.title("Laplace 3D Explorer")
         self.geometry("1200x700")
