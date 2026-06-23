@@ -139,6 +139,13 @@ class VisualizationPanel(tk.Frame):
         return X, Y, Z
 
     def render_visualization(self, event=None):
+        if hasattr(self, '_render_timer') and self._render_timer is not None:
+            self.after_cancel(self._render_timer)
+            
+        # Debounce the render call by 150ms
+        self._render_timer = self.after(150, self._execute_render_visualization)
+        
+    def _execute_render_visualization(self):
         if self._is_rendering:
             return
         self._is_rendering = True

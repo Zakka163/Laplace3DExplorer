@@ -31,8 +31,33 @@ def plot_isosurface(ax, X, Y, Z, T):
     ax.clear()
     val = (T.min() + T.max()) / 2.0
     try:
-        # skimage marching cubes returns (vertices, faces, normals, values)
-        verts, faces, _, _ = measure.marching_cubes(T, val, spacing=(X[0,1,0]-X[0,0,0], Y[1,0,0]-Y[0,0,0], Z[0,0,1]-Z[0,0,0]))
+        # Downsample to ~40x40x40 to prevent UI freeze
+        ny, nx, nz = T.shape
+        sy = max(1, ny // 40)
+        sx = max(1, nx // 40)
+        sz = max(1, nz // 40)
+        
+        T_sub = T[::sy, ::sx, ::sz]
+        X_sub = X[::sy, ::sx, ::sz]
+        Y_sub = Y[::sy, ::sx, ::sz]
+        Z_sub = Z[::sy, ::sx, ::sz]
+        
+        # We need spacing for the sub-grid. This is an approximation for curvilinear grids.
+        dx = X_sub[0,1,0]-X_sub[0,0,0] if X_sub.shape[1] > 1 else 1.0
+        dy = Y_sub[1,0,0]-Y_sub[0,0,0] if Y_sub.shape[0] > 1 else 1.0
+        dz = Z_sub[0,0,1]-Z_sub[0,0,0] if Z_sub.shape[2] > 1 else 1.0
+        # Fallback to avoid zero spacing
+        if dx == 0: dx = 1.0
+        if dy == 0: dy = 1.0
+        if dz == 0: dz = 1.0
+        
+        verts, faces, _, _ = measure.marching_cubes(T_sub, val, spacing=(dx, dy, dz))
+        
+        # Center the isosurface to physical space
+        verts[:, 0] += X_sub.min()
+        verts[:, 1] += Y_sub.min()
+        verts[:, 2] += Z_sub.min()
+        
         ax.plot_trisurf(verts[:, 0], verts[:, 1], faces, verts[:, 2], color='red', alpha=0.8, edgecolor='none')
         ax.set_title(f"Isosurface (T = {val:.2f})", color='white')
     except Exception as e:
