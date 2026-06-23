@@ -31,8 +31,11 @@ class StartupDialog(tk.Toplevel):
         tk.Button(self, text="Create Environment", bg="#006400", fg="white", font=('Arial', 10, 'bold'), relief="flat", command=self.on_submit).pack(pady=20)
         
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
-        self.transient(master)
-        self.grab_set()
+        
+        # Bring to front instead of grab/transient which hides it if master is hidden
+        self.lift()
+        self.attributes('-topmost', True)
+        self.after_idle(self.attributes, '-topmost', False)
         
     def on_submit(self):
         try:
