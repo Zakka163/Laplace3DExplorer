@@ -6,6 +6,7 @@ import os
 class StartupDialog(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
+        print("[INFO] Opening Setup Dialog...")
         self.title("Simulation Setup")
         self.geometry("350x250")
         self.configure(bg="#2B2B2B")
@@ -60,8 +61,10 @@ class Laplace3DApp(tk.Tk):
         self.after(10, self.show_startup)
         
     def show_startup(self):
+        print("[INFO] Calling Startup Dialog...")
         dialog = StartupDialog(self)
         if not dialog.result:
+            print("[INFO] Setup Dialog closed without result. Exiting...")
             self.destroy()
             return
             
@@ -277,5 +280,6 @@ class Laplace3DApp(tk.Tk):
             messagebox.showinfo("Export", "CSV Exported Successfully!")
 
 if __name__ == "__main__":
+    print("[INFO] Starting Laplace 3D Explorer Process...")
     app = Laplace3DApp()
     app.mainloop()
