@@ -61,7 +61,7 @@ class Laplace3DApp(tk.Tk):
         self.Ly = 1.0
         self.Lz = 1.0
         
-        self.setup_dialog = SetupDialog(self, self.on_setup_submit)
+        self.setup_dialog = SetupDialog(self, self.on_setup_submit, is_initial=True)
         
         self.loading_frame = tk.Frame(self, bg=Theme.BG_ROOT)
         tk.Label(self.loading_frame, text="Loading Physics Engine & 3D Visualizer...\nPlease wait...", bg=Theme.BG_ROOT, fg=Theme.FG_MAIN, font=Theme.FONT_TITLE, justify=tk.CENTER).pack(pady=50)
@@ -183,11 +183,7 @@ class Laplace3DApp(tk.Tk):
         style.configure('TLabel', background=Theme.BG_ROOT, foreground=Theme.FG_MAIN)
         style.configure('TButton', background=Theme.SUCCESS, foreground=Theme.FG_MAIN, font=Theme.FONT_SMALL)
         
-        # Setup Dialog if it exists
-        if hasattr(self, 'setup_dialog') and hasattr(self.setup_dialog, 'setup_frame'):
-            self.setup_dialog.setup_frame.configure(style='Setup.TFrame')
-            # The canvas and inner frames of SetupDialog are harder to update dynamically
-            # Usually users don't change theme while in setup dialog.
+        # Loading frame if it exists
             
         if hasattr(self, 'loading_frame'):
             self.loading_frame.configure(bg=Theme.BG_ROOT)
@@ -217,23 +213,8 @@ class Laplace3DApp(tk.Tk):
             self.visualization_panel.render_visualization()
             
     def open_setup_dialog(self):
-        # Hide main UI frames
-        if hasattr(self, 'control_panel') and self.control_panel is not None:
-            self.control_panel.pack_forget()
-        if hasattr(self, 'v_paned') and self.v_paned is not None:
-            self.v_paned.pack_forget()
-            
-        # Clear solver result
-        self.solver_res = None
-        
-        # Show setup frame again
-        self.setup_dialog.show()
-        
-    def restore_main_ui(self):
-        if hasattr(self, 'control_panel') and self.control_panel is not None:
-            self.control_panel.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5, before=self.v_paned)
-        if hasattr(self, 'v_paned') and self.v_paned is not None:
-            self.v_paned.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        # Instantiate a modal SetupDialog popup
+        SetupDialog(self, self.on_setup_submit, is_initial=False)
 
     def solve_system(self):
         try:
