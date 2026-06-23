@@ -70,7 +70,7 @@ def plot_domain_geometry(ax, Lx, Ly, Lz):
     ax.set_ylim([-0.1 * Ly, 1.1 * Ly if Ly > 0 else 1.0])
     ax.set_zlim([-0.1 * Lz, 1.1 * Lz if Lz > 0 else 1.0])
     
-def plot_slice3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
+def plot_cutaway3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
     ax.clear()
     
     corners = np.array([
@@ -84,20 +84,22 @@ def plot_slice3d(ax, X, Y, Z, T, z_idx, Lx, Ly, Lz):
         [corners[0], corners[4]], [corners[1], corners[5]], [corners[2], corners[6]], [corners[3], corners[7]]
     ]
     for edge in edges:
-        ax.plot3D(*zip(*edge), color='gray', alpha=0.5, linewidth=1)
+        ax.plot3D(*zip(*edge), color='gray', alpha=0.3, linewidth=1)
         
-    X2D = X[:, :, z_idx]
-    Y2D = Y[:, :, z_idx]
-    T2D = T[:, :, z_idx]
-    z_val = Z[0, 0, z_idx]
+    X_cut = X[:, :, :z_idx+1]
+    Y_cut = Y[:, :, :z_idx+1]
+    Z_cut = Z[:, :, :z_idx+1]
+    T_cut = T[:, :, :z_idx+1]
     
-    ct = ax.contourf(X2D, Y2D, T2D, zdir='z', offset=z_val, levels=50, cmap='jet', vmin=T.min(), vmax=T.max())
+    step = max(1, int(np.ceil(T_cut.size / 5000)))
+    Xs, Ys, Zs, Ts = X_cut.flat[::step], Y_cut.flat[::step], Z_cut.flat[::step], T_cut.flat[::step]
+    
+    sc = ax.scatter(Xs, Ys, Zs, c=Ts, cmap='jet', alpha=0.6, s=10, vmin=T.min(), vmax=T.max())
     
     ax.set_xlim3d(0, Lx)
     ax.set_ylim3d(0, Ly)
     ax.set_zlim3d(0, Lz)
     
-    ax.set_title(f"Slice 3D (Z = {z_val:.2f})", color='white')
-    return ct
-    
-    return None
+    z_val = Z[0, 0, z_idx]
+    ax.set_title(f"Cutaway 3D (Z ≤ {z_val:.2f})", color='white')
+    return sc
